@@ -1,6 +1,6 @@
 # ImageFactory
 
-Images pog 
+Port of image factory lol. wont bee finished soon bcuz skool and im bad @ codin
 
 ## Credits
 
