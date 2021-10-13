@@ -150,7 +150,8 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
           FileUtils::GetFileName(image.c_str(), false), true);
       levelBarLayoutElement->set_minWidth(1.0f);
       auto addBtn = QuestUI::BeatSaberUI::CreateUIButton(
-          levelBarLayoutElement->get_transform(), "",
+          levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
+          Vector2(10.0f, 10.0f),
           [image, this, sprite, createImage, animText, widthDisplayText,
            heightText, fileSizeDisplayText, loadTimeText, createImageGO,
            imageDisplay, stream, fileSize]() mutable -> void {
