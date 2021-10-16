@@ -4,6 +4,7 @@
 #include "GlobalNamespace/PlayerVRControllersManager.hpp"
 #include "GlobalNamespace/VRController.hpp"
 #include "HMUI/Touchable.hpp"
+#include "Presenters/PresentorManager.hpp"
 #include "UnityEngine/Collider.hpp"
 #include "UnityEngine/Physics.hpp"
 #include "UnityEngine/Quaternion.hpp"
@@ -46,6 +47,33 @@ void ImageFactory::Components::IFImage::Render() {
       Vector2(scaleX * (width / 3), scaleY * (height / 3)));
 }
 
+void ImageFactory::Components::IFImage::Despawn() {
+  screen->SetActive(false);
+  image->get_gameObject()->SetActive(false);
+  if (inSong) {
+    if (inSongScreen && inSongImage) {
+      inSongScreen->SetActive(true);
+      inSongImage->get_gameObject()->SetActive(true);
+    }
+  }
+}
+
+void ImageFactory::Components::IFImage::Spawn() {
+  screen->SetActive(true);
+  image->get_gameObject()->SetActive(true);
+  if (!inSongScreen && inSong) {
+    inSongScreen = BeatSaberUI::CreateFloatingScreen(
+        Vector2(scaleX * (width / 3), scaleY * (height / 3)), Vector3(x, y, z),
+        Vector3(angleX, angleY, angleZ), 0.0f, false, true, 4);
+
+    inSongImage = BeatSaberUI::CreateImage(
+        screen->get_transform(), sprite, Vector2(x, y),
+        Vector2(scaleX * (width / 3), scaleY * (height / 3)));
+  }
+  inSongScreen->SetActive(true);
+  inSongImage->get_gameObject()->SetActive(true);
+}
+
 void ImageFactory::Components::IFImage::Update() {
   if (image) {
     UnityEngine::Object::Destroy(image);
@@ -78,4 +106,6 @@ void ImageFactory::Components::IFImage::ctor(UnityEngine::Sprite* sprite,
   this->enabled = true;
   scaleX = 1.0f;
   scaleY = 1.0f;
+  this->presentationoption = "EVERYWHERE";
+  inSong = false;
 }

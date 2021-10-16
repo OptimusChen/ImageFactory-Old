@@ -3,6 +3,7 @@
 #include "Components/IFImage.hpp"
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "HMUI/Touchable.hpp"
+#include "Presenters/PresentorManager.hpp"
 #include "TMPro/TextAlignmentOptions.hpp"
 #include "UI/ImageFactoryFlowCoordinator.hpp"
 #include "UnityEngine/GameObject.hpp"
@@ -68,6 +69,27 @@ void NewImageViewController::DidActivate(bool firstActivation,
                                           image->scaleY = f;
                                           image->Update();
                                         });
+    auto topBar = QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(
+        container->get_transform());
+    topBar->get_rectTransform()->set_anchoredPosition(Vector2(0.0f, 35.0f));
+    auto topBarElement =
+        topBar->GetComponent<UnityEngine::UI::LayoutElement*>();
+    topBarElement->set_preferredWidth(12);
+    topBarElement->set_preferredHeight(40);
+    auto topBarBG =
+        topBar->get_gameObject()->AddComponent<QuestUI::Backgroundable*>();
+    topBarBG->ApplyBackground(il2cpp_utils::newcsstr("panel-top"));
+    topBarBG->background->set_color(UnityEngine::Color(0.0f, 0.0f, 0.0f, 0.9f));
+
+    BeatSaberUI::CreateDropdown(
+        topBarElement->get_transform(), "Presentation Options",
+        image->presentationoption,
+        ImageFactory::Presentors::PresentorManager::SET,
+        [this](std::string_view s) {
+          image->presentationoption = to_utf8(to_utf16(s));
+          Presentors::PresentorManager::Parse(
+              image, il2cpp_utils::createcsstr(to_utf8(to_utf16(s))));
+        });
   }
 }
 

@@ -1,5 +1,8 @@
 #include "main.hpp"
 
+#include "Hooks/IHook.hpp"
+#include "Hooks/Impl/PresentorHooks.hpp"
+#include "Hooks/Impl/ScoreControllerUpdate.hpp"
 #include "UI/ImageFactoryFlowCoordinator.hpp"
 #include "Utils/FileUtils.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
@@ -48,7 +51,13 @@ extern "C" void load() {
   QuestUI::Register::RegisterModSettingsFlowCoordinator<
       ImageFactory::ImageFactoryFlowCoordinator*>(modInfo);
 
+  new ImageFactory::Hooks::ScoreControllerUpdate("ScoreController_Update");
+  new ImageFactory::Hooks::PresentorHooks("PresentorHooks");
+
   getLogger().info("Installing hooks...");
-  // Install our hooks (none defined yet)
-  getLogger().info("Installed all hooks!");
+  if (!ImageFactory::IHook::InstallHooks()) {
+    getLogger().info("Failed to install hooks.");
+  } else {
+    getLogger().info("Finished installing hooks!");
+  }
 }
