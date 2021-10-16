@@ -10,4 +10,9 @@ DECLARE_CLASS_CODEGEN(
                                                            "ViewController",
                                                            "DidActivate", 3),
                             bool firstActivation, bool addedToHierarchy,
-                            bool screenSystemEnabling););
+                            bool screenSystemEnabling);
+    public
+    : std::function<void(std::string)>
+        createImageFunction;
+    void set_createImageFunction(
+        std::function<void(std::string)> createImageFunction););

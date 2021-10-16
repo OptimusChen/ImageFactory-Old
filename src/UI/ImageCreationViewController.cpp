@@ -124,6 +124,8 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
     TMPro::TextMeshProUGUI* heightText;
     TMPro::TextMeshProUGUI* fileSizeDisplayText;
     TMPro::TextMeshProUGUI* loadTimeText;
+    UnityEngine::UI::Button* createButton;
+    UnityEngine::UI::Button* cancelButton;
 
     for (auto& image : pictures) {
       UnityEngine::UI::HorizontalLayoutGroup* levelBarLayout =
@@ -154,24 +156,25 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
           Vector2(10.0f, 10.0f),
           [image, this, sprite, createImage, animText, widthDisplayText,
            heightText, fileSizeDisplayText, loadTimeText, createImageGO,
-           imageDisplay, stream, fileSize]() mutable -> void {
+           imageDisplay, stream, fileSize, createButton,
+           cancelButton]() mutable -> void {
             createImage = QuestUI::BeatSaberUI::CreateModal(
-                get_transform(), UnityEngine::Vector2(70.0f, 60.0f),
+                get_transform(), UnityEngine::Vector2(70.0f, 50.0f),
                 [](HMUI::ModalView* modal) {}, true);
             createImageGO =
                 QuestUI::BeatSaberUI::CreateScrollableModalContainer(
                     createImage);
             imageDisplay = QuestUI::BeatSaberUI::CreateImage(
-                createImage->get_transform(), sprite, Vector2(-18.0f, 13.0f),
+                createImage->get_transform(), sprite, Vector2(-18.0f, 8.0f),
                 Vector2(30.0f, 30.0f));
             if (FileUtils::isGifFile(image.c_str())) {
               animText = QuestUI::BeatSaberUI::CreateText(
                   createImage->get_transform(), "Animated: Yes",
-                  Vector2(30.0f, 23.0f));
+                  Vector2(30.0f, 17.0f));
             } else {
               animText = QuestUI::BeatSaberUI::CreateText(
                   createImage->get_transform(), "Animated: No",
-                  Vector2(30.0f, 23.0f));
+                  Vector2(30.0f, 17.0f));
             }
             widthDisplayText = QuestUI::BeatSaberUI::CreateText(
                 createImage->get_transform(),
@@ -180,7 +183,7 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
                         std::to_string(sprite->get_textureRect().get_width()),
                         6) +
                     "px",
-                Vector2(30.0f, 17.0f));
+                Vector2(30.0f, 11.0f));
             heightText = QuestUI::BeatSaberUI::CreateText(
                 createImage->get_transform(),
                 "Height: " +
@@ -188,7 +191,7 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
                         std::to_string(sprite->get_textureRect().get_height()),
                         6) +
                     "px",
-                Vector2(30.0f, 11.0f));
+                Vector2(30.0f, 5.0f));
             fileSizeDisplayText = QuestUI::BeatSaberUI::CreateText(
                 createImage->get_transform(),
                 "File Size: " +
@@ -197,10 +200,18 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
                             round(fileSize / FileSizeDivisor(fileSize))),
                         6) +
                     " " + FileSizeExtension(fileSize),
-                Vector2(30.0f, 5.0f));
+                Vector2(30.0f, -1.0f));
             loadTimeText = QuestUI::BeatSaberUI::CreateText(
                 createImage->get_transform(), "Load Time: 0 ms",
-                Vector2(30.0f, -1.0f));
+                Vector2(30.0f, -7.0f));
+            createButton = QuestUI::BeatSaberUI::CreateUIButton(
+                createImage->get_transform(), "CREATE", Vector2(14.0f, -17.0f),
+                Vector2(30.0f, 10.0f),
+                [&]() { this->createImageFunction(image.c_str()); });
+            cancelButton = QuestUI::BeatSaberUI::CreateUIButton(
+                createImage->get_transform(), "CANCEL", Vector2(-18.0f, -17.0f),
+                Vector2(30.0f, 10.0f),
+                [createImage]() { createImage->Hide(true, nullptr); });
             animText->set_fontSize(5.0f);
             widthDisplayText->set_fontSize(5.0f);
             heightText->set_fontSize(5.0f);
@@ -213,4 +224,9 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
           ->set_alignment(TMPro::TextAlignmentOptions::Center);
     }
   }
+}
+
+void ImageCreationViewController::set_createImageFunction(
+    std::function<void(std::string)> createImage) {
+  createImageFunction = createImage;
 }

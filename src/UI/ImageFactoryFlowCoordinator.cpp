@@ -5,6 +5,7 @@
 #include "UI/ImageCreationViewController.hpp"
 #include "UI/ImageEditingViewController.hpp"
 #include "UI/ImageFactoryViewController.hpp"
+#include "UI/NewImageViewController.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/QuestUI.hpp"
 
@@ -33,10 +34,45 @@ void ImageFactoryFlowCoordinator::DidActivate(bool firstActivation,
           ImageFactory::ViewControllers::ImageEditingViewController*>();
     }
 
+    this->imageCreationViewController = reinterpret_cast<
+        ImageFactory::ViewControllers::ImageCreationViewController*>(
+        imageCreationView);
+
+    std::function<void(std::string)> func = std::bind(
+        &ImageFactoryFlowCoordinator::AddedImage, this, std::placeholders::_1);
+    imageCreationViewController->set_createImageFunction(func);
+
     ImageFactoryFlowCoordinator::ProvideInitialViewControllers(
-        imageFactoryView, imageCreationView, imageEditingView, nullptr,
-        nullptr);
+        imageFactoryView, imageCreationViewController, imageEditingView,
+        nullptr, nullptr);
   }
+}
+
+void ImageFactoryFlowCoordinator::AddedImage(std::string s) {
+  il2cpp_utils::getLogger().info("[ImageFactory] Creating ViewController");
+  ImageFactory::ViewControllers::NewImageViewController* viewController =
+      reinterpret_cast<ImageFactory::ViewControllers::NewImageViewController*>(
+          QuestUI::BeatSaberUI::CreateViewController<
+              ImageFactory::ViewControllers::NewImageViewController*>());
+  il2cpp_utils::getLogger().info(
+      "[ImageFactory] Finished Creating ViewController");
+  if (!viewController) {
+    il2cpp_utils::getLogger().info("[ImageFactory] Viewcontroller is null");
+    return;
+  }
+  viewController->Initialize(il2cpp_utils::createcsstr(s));
+  il2cpp_utils::getLogger().info(
+      "[ImageFactory] transitioning view controllers");
+  this->SetLeftScreenViewController(
+      QuestUI::BeatSaberUI::CreateViewController<HMUI::ViewController*>(),
+      HMUI::ViewController::AnimationType::In);
+  this->SetRightScreenViewController(
+      QuestUI::BeatSaberUI::CreateViewController<HMUI::ViewController*>(),
+      HMUI::ViewController::AnimationType::In);
+  this->ReplaceTopViewController(
+      viewController, this, this, nullptr,
+      HMUI::ViewController::AnimationType::In,
+      HMUI::ViewController::AnimationDirection::Horizontal);
 }
 
 void ImageFactoryFlowCoordinator::BackButtonWasPressed(

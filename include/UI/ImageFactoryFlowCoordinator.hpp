@@ -1,6 +1,7 @@
 #pragma once
 #include "HMUI/FlowCoordinator.hpp"
 #include "HMUI/ViewController.hpp"
+#include "UI/ImageCreationViewController.hpp"
 #include "UI/ImageFactoryViewController.hpp"
 #include "custom-types/shared/macros.hpp"
 
@@ -9,6 +10,9 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_FIELD(HMUI::ViewController*, imageFactoryView);
     DECLARE_INSTANCE_FIELD(HMUI::ViewController*, imageCreationView);
     DECLARE_INSTANCE_FIELD(HMUI::ViewController*, imageEditingView);
+    DECLARE_INSTANCE_FIELD_DEFAULT(
+        ImageFactory::ViewControllers::ImageCreationViewController*,
+        imageCreationViewController, nullptr);
     DECLARE_OVERRIDE_METHOD(void, DidActivate,
                             il2cpp_utils::FindMethodUnsafe("HMUI",
                                                            "FlowCoordinator",
@@ -19,4 +23,5 @@ DECLARE_CLASS_CODEGEN(
         void, BackButtonWasPressed,
         il2cpp_utils::FindMethodUnsafe("HMUI", "FlowCoordinator",
                                        "BackButtonWasPressed", 1),
-        HMUI::ViewController* topViewController););
+        HMUI::ViewController* topViewController);
+    void AddedImage(std::string););
