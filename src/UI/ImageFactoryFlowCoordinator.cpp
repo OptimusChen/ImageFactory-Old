@@ -2,6 +2,7 @@
 
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
+#include "Presenters/PresentorManager.hpp"
 #include "UI/ImageCreationViewController.hpp"
 #include "UI/ImageEditingViewController.hpp"
 #include "UI/ImageFactoryViewController.hpp"
@@ -10,6 +11,7 @@
 #include "questui/shared/QuestUI.hpp"
 
 using namespace ImageFactory;
+using namespace ImageFactory::Presentors;
 
 DEFINE_TYPE(ImageFactory, ImageFactoryFlowCoordinator);
 
@@ -77,6 +79,13 @@ void ImageFactoryFlowCoordinator::AddedImage(std::string s) {
 
 void ImageFactoryFlowCoordinator::BackButtonWasPressed(
     HMUI::ViewController* topView) {
+  for (std::pair<IFImage*, std::string> pair :
+       *Presentors::PresentorManager::MAP) {
+    if (pair.second != PresentorManager::EVERYWHERE &&
+        pair.second != PresentorManager::IN_MENU) {
+      pair.first->Despawn();
+    }
+  }
   this->parentFlowCoordinator->DismissFlowCoordinator(
       this, HMUI::ViewController::AnimationDirection::Horizontal, nullptr,
       false);

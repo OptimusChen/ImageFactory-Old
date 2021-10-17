@@ -36,7 +36,7 @@ void PresentorManager::Parse(ImageFactory::Components::IFImage* image,
 }
 void PresentorManager::SpawnforAll(std::string str) {
   for (std::pair<IFImage*, std::string> pair : *MAP) {
-    if (pair.second == str) {
+    if (pair.second.compare(str) == 0) {
       il2cpp_utils::getLogger().info("[ImageFactory] Spawning image");
       pair.first->Spawn();
     }
@@ -44,7 +44,7 @@ void PresentorManager::SpawnforAll(std::string str) {
 }
 void PresentorManager::DeSpawnforAll(std::string str) {
   for (std::pair<IFImage*, std::string> pair : *MAP) {
-    if (pair.second == str) {
+    if (pair.second.compare(str) == 0) {
       pair.first->Despawn();
     }
   }
