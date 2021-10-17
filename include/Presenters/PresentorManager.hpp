@@ -8,6 +8,8 @@ DECLARE_CLASS_CODEGEN(
     ImageFactory::Presentors, PresentorManager, UnityEngine::MonoBehaviour,
     DECLARE_STATIC_METHOD(void, Parse, ImageFactory::Components::IFImage* image,
                           Il2CppString* str);
+    DECLARE_STATIC_METHOD(void, ClearInfo,
+                          ImageFactory::Components::IFImage* image);
     public
     : static std::vector<std::string>
         SET;

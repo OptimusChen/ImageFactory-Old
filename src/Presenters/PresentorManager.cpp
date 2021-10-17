@@ -34,6 +34,7 @@ void PresentorManager::Parse(ImageFactory::Components::IFImage* image,
   }
   MAP->insert({image, s});
 }
+void PresentorManager::ClearInfo(IFImage* image) { MAP->erase(image); }
 void PresentorManager::SpawnforAll(std::string str) {
   for (std::pair<IFImage*, std::string> pair : *MAP) {
     if (pair.second.compare(str) == 0) {

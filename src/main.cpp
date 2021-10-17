@@ -1,11 +1,13 @@
 #include "main.hpp"
 
+#include "../include/PluginConfig.hpp"
 #include "Hooks/IHook.hpp"
 #include "Hooks/Impl/PresentorHooks.hpp"
 #include "Hooks/Impl/ScoreControllerUpdate.hpp"
 #include "UI/ImageFactoryFlowCoordinator.hpp"
 #include "Utils/FileUtils.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
+#include "extern/config-utils/shared/config-utils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/QuestUI.hpp"
 
@@ -36,7 +38,10 @@ extern "C" void setup(ModInfo& info) {
   info.version = VERSION;
   modInfo = info;
 
-  getConfig().Load();  // Load the config file
+  getConfig().Load();
+  getPluginConfig().Init(info);
+  getConfig().Reload();
+  getConfig().Write();  // Load the config file
   getLogger().info("Completed setup!");
 }
 

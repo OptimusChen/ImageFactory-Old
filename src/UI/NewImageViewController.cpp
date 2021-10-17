@@ -1,5 +1,9 @@
 #include "UI/NewImageViewController.hpp"
 
+#include <iostream>
+#include <vector>
+
+#include "../include/PluginConfig.hpp"
 #include "Components/IFImage.hpp"
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "HMUI/Touchable.hpp"
@@ -11,7 +15,11 @@
 #include "UnityEngine/UI/LayoutElement.hpp"
 #include "UnityEngine/WaitForSeconds.hpp"
 #include "Utils/FileUtils.hpp"
+#include "beatsaber-hook/shared/config/config-utils.hpp"
+#include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
 #include "bs-utils/shared/utils.hpp"
+#include "extern/config-utils/shared/config-utils.hpp"
+#include "main.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/Backgroundable.hpp"
 #include "questui/shared/QuestUI.hpp"
@@ -90,6 +98,82 @@ void NewImageViewController::DidActivate(bool firstActivation,
           Presentors::PresentorManager::Parse(
               image, il2cpp_utils::createcsstr(to_utf8(to_utf16(s))));
         });
+    auto cancelButton = BeatSaberUI::CreateUIButton(
+        this->get_transform(), "", Vector2(-22.0f, -38.0f),
+        Vector2(40.0f, 8.0f), [this]() {
+          Presentors::PresentorManager::ClearInfo(image);
+          image->Despawn();
+          UnityEngine::Object::Destroy(image);
+          leaveViewController();
+        });
+    QuestUI::BeatSaberUI::CreateText(cancelButton->get_transform(), "CANCEL")
+        ->set_alignment(TMPro::TextAlignmentOptions::Center);
+    auto saveButton = BeatSaberUI::CreateUIButton(
+        this->get_transform(), "", Vector2(22.0f, -38.0f), Vector2(40.0f, 8.0f),
+        [this]() {
+          ConfigDocument& configDoc = getPluginConfig().config->config;
+          rapidjson::Document::AllocatorType& allocator =
+              getPluginConfig().config->config.GetAllocator();
+          rapidjson::Value configObj;
+          configObj.SetObject();
+          configObj.AddMember("x", image->x, allocator);
+          configObj.AddMember("y", image->y, allocator);
+          configObj.AddMember("z", image->z, allocator);
+          configObj.AddMember("angleX",
+                              image->screen->get_transform()
+                                  ->get_rotation()
+                                  .get_eulerAngles()
+                                  .x,
+                              allocator);
+          configObj.AddMember("angleY",
+                              image->screen->get_transform()
+                                  ->get_rotation()
+                                  .get_eulerAngles()
+                                  .y,
+                              allocator);
+          configObj.AddMember("angleZ",
+                              image->screen->get_transform()
+                                  ->get_rotation()
+                                  .get_eulerAngles()
+                                  .z,
+                              allocator);
+          configObj.AddMember("scaleX", image->scaleX, allocator);
+          configObj.AddMember("scaleY", image->scaleY, allocator);
+          configObj.AddMember("width", image->width, allocator);
+          configObj.AddMember("height", image->height, allocator);
+          configObj.AddMember("name", image->name, allocator);
+          configObj.AddMember("presentationOption", image->presentationoption,
+                              allocator);
+          configObj.AddMember("enabled", image->enabled, allocator);
+          configObj.AddMember("path", image->path, allocator);
+          configDoc.AddMember(
+              rapidjson::Value(
+                  image->fileName + "_" +
+                      std::to_string(getPluginConfig().Amount.GetValue() + 1),
+                  allocator)
+                  .Move(),
+              configObj, allocator);
+          getPluginConfig().config->Write();
+          getPluginConfig().config->Reload();
+          std::string s = getPluginConfig().Images.GetValue();
+          getPluginConfig().Images.SetValue(
+              s + "/" + image->fileName + "_" +
+              std::to_string(getPluginConfig().Amount.GetValue() + 1));
+          getPluginConfig().Amount.SetValue(
+              getPluginConfig().Amount.GetValue() + 1);
+          leaveViewController();
+        });
+    QuestUI::BeatSaberUI::CreateText(saveButton->get_transform(), "SAVE")
+        ->set_alignment(TMPro::TextAlignmentOptions::Center);
+  }
+}
+
+void NewImageViewController::DidDeactivate(bool removedFromHierarchy,
+                                           bool screenSystemEnabling) {
+  if (image) {
+    Presentors::PresentorManager::ClearInfo(image);
+    image->Despawn();
+    UnityEngine::Object::Destroy(image);
   }
 }
 

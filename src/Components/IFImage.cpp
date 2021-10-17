@@ -91,7 +91,7 @@ void ImageFactory::Components::IFImage::Spawn() {
     il2cpp_utils::getLogger().info("[ImageFactory] creating floating screen");
     inSongScreen = BeatSaberUI::CreateFloatingScreen(
         Vector2(scaleX * (width / 3), scaleY * (height / 3)), Vector3(x, y, z),
-        raycastRot.get_eulerAngles(), 0.0f, true, true, 4);
+        raycastRot.get_eulerAngles(), 0.0f, false, true, 4);
     inSongScreen->SetActive(true);
     il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
 
@@ -143,4 +143,6 @@ void ImageFactory::Components::IFImage::ctor(UnityEngine::Sprite* sprite,
   scaleY = 1.0f;
   this->presentationoption = "Everywhere";
   inSong = false;
+  fileName = FileUtils::GetFileName(to_utf8(csstrtostr(path)), false);
+  this->path = to_utf8(csstrtostr(path));
 }

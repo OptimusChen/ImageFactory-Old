@@ -2,6 +2,7 @@
 #include "HMUI/FlowCoordinator.hpp"
 #include "HMUI/ViewController.hpp"
 #include "UI/ImageCreationViewController.hpp"
+#include "UI/ImageEditingViewController.hpp"
 #include "UI/ImageFactoryViewController.hpp"
 #include "custom-types/shared/macros.hpp"
 
@@ -13,6 +14,9 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_FIELD_DEFAULT(
         ImageFactory::ViewControllers::ImageCreationViewController*,
         imageCreationViewController, nullptr);
+    DECLARE_INSTANCE_FIELD_DEFAULT(
+        ImageFactory::ViewControllers::ImageEditingViewController*,
+        imageEditingViewController, nullptr);
     DECLARE_OVERRIDE_METHOD(void, DidActivate,
                             il2cpp_utils::FindMethodUnsafe("HMUI",
                                                            "FlowCoordinator",

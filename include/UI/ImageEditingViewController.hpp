@@ -10,4 +10,6 @@ DECLARE_CLASS_CODEGEN(
                                                            "ViewController",
                                                            "DidActivate", 3),
                             bool firstActivation, bool addedToHierarchy,
-                            bool screenSystemEnabling););
+                            bool screenSystemEnabling);
+    DECLARE_INSTANCE_FIELD(bool, refresh);
+    DECLARE_INSTANCE_METHOD(void, Refresh););

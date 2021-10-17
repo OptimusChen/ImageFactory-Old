@@ -40,13 +40,17 @@ void ImageFactoryFlowCoordinator::DidActivate(bool firstActivation,
         ImageFactory::ViewControllers::ImageCreationViewController*>(
         imageCreationView);
 
+    this->imageEditingViewController = reinterpret_cast<
+        ImageFactory::ViewControllers::ImageEditingViewController*>(
+        imageEditingView);
+
     std::function<void(std::string)> func = std::bind(
         &ImageFactoryFlowCoordinator::AddedImage, this, std::placeholders::_1);
     imageCreationViewController->set_createImageFunction(func);
 
     ImageFactoryFlowCoordinator::ProvideInitialViewControllers(
-        imageFactoryView, imageCreationViewController, imageEditingView,
-        nullptr, nullptr);
+        imageFactoryView, imageCreationViewController,
+        imageEditingViewController, nullptr, nullptr);
   }
 }
 
@@ -63,6 +67,16 @@ void ImageFactoryFlowCoordinator::AddedImage(std::string s) {
     return;
   }
   viewController->Initialize(il2cpp_utils::createcsstr(s));
+  viewController->leaveViewController = [this]() {
+    this->SetLeftScreenViewController(imageCreationViewController,
+                                      HMUI::ViewController::AnimationType::In);
+    this->SetRightScreenViewController(imageEditingViewController,
+                                       HMUI::ViewController::AnimationType::In);
+    this->ReplaceTopViewController(
+        imageFactoryView, this, this, nullptr,
+        HMUI::ViewController::AnimationType::In,
+        HMUI::ViewController::AnimationDirection::Horizontal);
+  };
   il2cpp_utils::getLogger().info(
       "[ImageFactory] transitioning view controllers");
   this->SetLeftScreenViewController(
@@ -75,6 +89,7 @@ void ImageFactoryFlowCoordinator::AddedImage(std::string s) {
       viewController, this, this, nullptr,
       HMUI::ViewController::AnimationType::In,
       HMUI::ViewController::AnimationDirection::Horizontal);
+  imageEditingViewController->Refresh();
 }
 
 void ImageFactoryFlowCoordinator::BackButtonWasPressed(
