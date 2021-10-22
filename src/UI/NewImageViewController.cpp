@@ -29,6 +29,7 @@ using namespace UnityEngine;
 using namespace ImageFactory::ViewControllers;
 using namespace QuestUI::BeatSaberUI;
 using namespace TMPro;
+using namespace ImageFactory::Presentors;
 
 DEFINE_TYPE(ImageFactory::ViewControllers, NewImageViewController);
 
@@ -161,6 +162,9 @@ void NewImageViewController::DidActivate(bool firstActivation,
               std::to_string(getPluginConfig().Amount.GetValue() + 1));
           getPluginConfig().Amount.SetValue(
               getPluginConfig().Amount.GetValue() + 1);
+          PresentorManager::Parse(
+              image, il2cpp_utils::createcsstr(image->presentationoption));
+          hasSaved = true;
           leaveViewController();
         });
     QuestUI::BeatSaberUI::CreateText(saveButton->get_transform(), "SAVE")
@@ -171,9 +175,11 @@ void NewImageViewController::DidActivate(bool firstActivation,
 void NewImageViewController::DidDeactivate(bool removedFromHierarchy,
                                            bool screenSystemEnabling) {
   if (image) {
-    Presentors::PresentorManager::ClearInfo(image);
-    image->Despawn();
-    UnityEngine::Object::Destroy(image);
+    if (!hasSaved) {
+      Presentors::PresentorManager::ClearInfo(image);
+      image->Despawn();
+      UnityEngine::Object::Destroy(image);
+    }
   }
 }
 
@@ -191,5 +197,6 @@ void NewImageViewController::Initialize(Il2CppString* s) {
     il2cpp_utils::getLogger().info("[IF] couldnt create Image");
     return;
   }
+  hasSaved = false;
   il2cpp_utils::getLogger().info("[IF] complete");
 }

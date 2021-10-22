@@ -1,6 +1,7 @@
 #include "Presenters/PresentorManager.hpp"
 
 #include "Components/IFImage.hpp"
+#include "beatsaber-hook/shared/utils/gc-alloc.hpp"
 
 DEFINE_TYPE(ImageFactory::Presentors, PresentorManager);
 
@@ -24,8 +25,10 @@ std::vector<std::string> PresentorManager::SET = {
     EVERYWHERE,    IN_MENU,  RESULTS_SCREEN,  IN_SONG,    PERCENT,
     PERCENT_RANGE, COMBO,    COMBO_INCREMENT, COMBO_HOLD, COMBO_DROP,
     FULL_COMBO,    IN_PAUSE, LAST_NOTE};
-std::unordered_map<IFImage*, std::string>* PresentorManager::MAP =
+
+SafePtr<std::unordered_map<IFImage*, std::string>> PresentorManager::MAP =
     new std::unordered_map<IFImage*, std::string>();
+
 void PresentorManager::Parse(ImageFactory::Components::IFImage* image,
                              Il2CppString* str) {
   std::string s = to_utf8(csstrtostr(str));
@@ -35,6 +38,26 @@ void PresentorManager::Parse(ImageFactory::Components::IFImage* image,
   MAP->insert({image, s});
 }
 void PresentorManager::ClearInfo(IFImage* image) { MAP->erase(image); }
+void PresentorManager::SpawnInMenu() {
+  for (std::pair<IFImage*, std::string> pair : *MAP) {
+    if (pair.second.compare(EVERYWHERE) == 0 ||
+        pair.second.compare(IN_MENU) == 0) {
+      pair.first->Spawn();
+    } else {
+      pair.first->Despawn();
+    }
+  }
+}
+void PresentorManager::SpawnAll() {
+  for (std::pair<IFImage*, std::string> pair : *MAP) {
+    pair.first->Spawn();
+  }
+}
+void PresentorManager::DespawnAll() {
+  for (std::pair<IFImage*, std::string> pair : *MAP) {
+    pair.first->Despawn();
+  }
+}
 void PresentorManager::SpawnforAll(std::string str) {
   for (std::pair<IFImage*, std::string> pair : *MAP) {
     if (pair.second.compare(str) == 0) {

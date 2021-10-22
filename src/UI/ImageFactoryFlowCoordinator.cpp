@@ -76,6 +76,7 @@ void ImageFactoryFlowCoordinator::AddedImage(std::string s) {
         imageFactoryView, this, this, nullptr,
         HMUI::ViewController::AnimationType::In,
         HMUI::ViewController::AnimationDirection::Horizontal);
+    PresentorManager::SpawnInMenu();
   };
   il2cpp_utils::getLogger().info(
       "[ImageFactory] transitioning view controllers");
@@ -89,18 +90,13 @@ void ImageFactoryFlowCoordinator::AddedImage(std::string s) {
       viewController, this, this, nullptr,
       HMUI::ViewController::AnimationType::In,
       HMUI::ViewController::AnimationDirection::Horizontal);
+  PresentorManager::DespawnAll();
   imageEditingViewController->Refresh();
 }
 
 void ImageFactoryFlowCoordinator::BackButtonWasPressed(
     HMUI::ViewController* topView) {
-  for (std::pair<IFImage*, std::string> pair :
-       *Presentors::PresentorManager::MAP) {
-    if (pair.second != PresentorManager::EVERYWHERE &&
-        pair.second != PresentorManager::IN_MENU) {
-      pair.first->Despawn();
-    }
-  }
+  PresentorManager::DespawnAll();
   this->parentFlowCoordinator->DismissFlowCoordinator(
       this, HMUI::ViewController::AnimationDirection::Horizontal, nullptr,
       false);

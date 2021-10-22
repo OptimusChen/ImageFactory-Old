@@ -47,5 +47,4 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_CTOR(ctor, UnityEngine::Sprite* sprite, Il2CppString* path); public
     : std::string name;
     std::string fileName; std::string path; std::string presentationoption;
-    bool enabled; custom_types::Helpers::Coroutine UpdateEveryTick();
-    DECLARE_SIMPLE_DTOR();)
+    bool enabled; custom_types::Helpers::Coroutine UpdateEveryTick();)

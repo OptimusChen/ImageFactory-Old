@@ -10,12 +10,14 @@ DECLARE_CLASS_CODEGEN(
                           Il2CppString* str);
     DECLARE_STATIC_METHOD(void, ClearInfo,
                           ImageFactory::Components::IFImage* image);
-    public
+    DECLARE_STATIC_METHOD(void, SpawnInMenu);
+    DECLARE_STATIC_METHOD(void, SpawnAll);
+    DECLARE_STATIC_METHOD(void, DespawnAll); public
     : static std::vector<std::string>
         SET;
     static void SpawnforAll(std::string str);
     static void DeSpawnforAll(std::string str);
-    static std::unordered_map<IFImage*, std::string> * MAP;
+    static SafePtr<std::unordered_map<IFImage*, std::string>> MAP;
     static std::string EVERYWHERE; static std::string IN_MENU;
     static std::string RESULTS_SCREEN; static std::string IN_SONG;
     static std::string PERCENT; static std::string PERCENT_RANGE;

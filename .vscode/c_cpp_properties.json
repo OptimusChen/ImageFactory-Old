@@ -13,9 +13,8 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/extern/**",
                 "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
-                "C:/Users/derek/Downloads/android-ndk-r23-windows/android-ndk-r23//**",
-                "${workspaceFolder}/extern/codegen/include",
-                "C:/Users/derek/Downloads/android-ndk-r23-windows/android-ndk-r23/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/linux"
+                "C:/Users/derek/Downloads/android-ndk-r23-windows/android-ndk-r23/*",
+                "C:/Users/derek/Downloads/android-ndk-r23-windows/android-ndk-r23//**"
             ],
             "name": "Quest",
             "cStandard": "c11",

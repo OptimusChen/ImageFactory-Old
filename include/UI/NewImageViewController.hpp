@@ -20,7 +20,7 @@ DECLARE_CLASS_CODEGEN(
                                                            "DidDeactivate", 2),
                             bool removedFromHierarchy,
                             bool screenSystemEnabling);
-    public
+    DECLARE_INSTANCE_FIELD(bool, hasSaved); public
     : std::string path;
     std::function<void()> leaveViewController;
     void Initialize(Il2CppString* str);
