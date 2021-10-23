@@ -17,7 +17,7 @@ DECLARE_CLASS_CODEGEN(
         SET;
     static void SpawnforAll(std::string str);
     static void DeSpawnforAll(std::string str);
-    static SafePtr<std::unordered_map<IFImage*, std::string>> MAP;
+    static std::unordered_map<IFImage*, std::string> * MAP;
     static std::string EVERYWHERE; static std::string IN_MENU;
     static std::string RESULTS_SCREEN; static std::string IN_SONG;
     static std::string PERCENT; static std::string PERCENT_RANGE;

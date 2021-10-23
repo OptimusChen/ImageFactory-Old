@@ -26,16 +26,16 @@ std::vector<std::string> PresentorManager::SET = {
     PERCENT_RANGE, COMBO,    COMBO_INCREMENT, COMBO_HOLD, COMBO_DROP,
     FULL_COMBO,    IN_PAUSE, LAST_NOTE};
 
-SafePtr<std::unordered_map<IFImage*, std::string>> PresentorManager::MAP =
+std::unordered_map<IFImage*, std::string>* PresentorManager::MAP =
     new std::unordered_map<IFImage*, std::string>();
 
 void PresentorManager::Parse(ImageFactory::Components::IFImage* image,
                              Il2CppString* str) {
-  std::string s = to_utf8(csstrtostr(str));
   if (MAP->contains(image)) {
     MAP->erase(image);
   }
-  MAP->insert({image, s});
+  image->presentationoption;
+  MAP->insert({image, to_utf8(csstrtostr(str))});
 }
 void PresentorManager::ClearInfo(IFImage* image) { MAP->erase(image); }
 void PresentorManager::SpawnInMenu() {

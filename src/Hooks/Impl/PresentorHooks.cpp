@@ -54,11 +54,12 @@ void createImagesFromConfig() {
         UnityEngine::GameObject* GO = GameObject::New_ctor(goName);
         il2cpp_utils::getLogger().info("[IF] test3");
         IFImage* image = GO->AddComponent<IFImage*>();
-        image->fileName = fileName.substr(0, fileName.find_last_of("_"));
-        image->path =
-            "/sdcard/ModData/com.beatgames.beatsaber/Mods/"
-            "ImageFactory/Images/" +
-            image->fileName;
+        image->ctor(BeatSaberUI::FileToSprite(
+                        "/sdcard/ModData/com.beatgames.beatsaber/Mods/"
+                        "ImageFactory/Images/" +
+                        image->fileName),
+                    il2cpp_utils::createcsstr(
+                        fileName.substr(0, fileName.find_last_of("_"))));
         il2cpp_utils::getLogger().info("[IF] test4");
 
         if (config.HasMember(image->fileName + "_" + std::to_string(i))) {
@@ -166,39 +167,32 @@ MAKE_HOOK_MATCH(MainMenuViewController_DidActivate,
                 bool addedToHierarchy, bool screenSystemEnabling) {
   MainMenuViewController_DidActivate(self, firstActivation, addedToHierarchy,
                                      screenSystemEnabling);
-  il2cpp_utils::getLogger().info("[ImageFactory] Main Menu Activation");
-  if (firstActivation) {
-    il2cpp_utils::getLogger().info("[ImageFactory] Loaded?");
-    if (!hasLoadedImagesFromConfig) {
-      hasLoadedImagesFromConfig = true;
-      il2cpp_utils::getLogger().info(
-          "[ImageFactory] Creating Images from Config");
-      GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
-          reinterpret_cast<custom_types::Helpers::enumeratorT*>(
-              custom_types::Helpers::CoroutineHelper::New(WaitForMenuLoad())));
-      il2cpp_utils::getLogger().info("[ImageFactory] Loaded Done");
-    }
-    il2cpp_utils::getLogger().info("[ImageFactory] Spawning Images");
-    il2cpp_utils::getLogger().info("[ImageFactory] Finished");
+  if (!hasLoadedImagesFromConfig) {
+    hasLoadedImagesFromConfig = true;
+    GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
+        reinterpret_cast<custom_types::Helpers::enumeratorT*>(
+            custom_types::Helpers::CoroutineHelper::New(WaitForMenuLoad())));
   }
 }
+
 MAKE_HOOK_MATCH(SongEnd, &StandardLevelScenesTransitionSetupDataSO::Finish,
                 void, StandardLevelScenesTransitionSetupDataSO* self,
                 LevelCompletionResults* levelCompletionResults) {
+  SongEnd(self, levelCompletionResults);
   il2cpp_utils::getLogger().info("[ImageFactory] test1");
+  PresentorManager::SpawnInMenu();
   for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
     il2cpp_utils::getLogger().info("[ImageFactory] test2");
 
     pair.first->inSong = false;
     il2cpp_utils::getLogger().info("[ImageFactory] test3");
-    GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
-        reinterpret_cast<custom_types::Helpers::enumeratorT*>(
-            custom_types::Helpers::CoroutineHelper::New(
-                pair.first->UpdateEveryTick())));
     il2cpp_utils::getLogger().info("[ImageFactory] test4");
+    // UnityEngine::GameObject::Destroy(pair.first->inSongImage);
+    // UnityEngine::GameObject::Destroy(pair.first->inSongScreen);
+    il2cpp_utils::getLogger().info("[ImageFactory] test5");
   }
-  PresentorManager::SpawnInMenu();
-  SongEnd(self, levelCompletionResults);
+
+  il2cpp_utils::getLogger().info("[ImageFactory] test6");
 }
 
 int combo = 0;
@@ -230,6 +224,9 @@ MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
     il2cpp_utils::getLogger().info("[ImageFactory] test2");
 
     pair.first->inSong = true;
+    // NULLPTR BECAUSE MANUALLY DESTROYED
+    // UnityEngine::GameObject::Destroy(pair.first->image);
+    // UnityEngine::GameObject::Destroy(pair.first->screen);
   }
 
   il2cpp_utils::getLogger().info("[ImageFactory] Spawning In Song");
@@ -245,13 +242,6 @@ MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
 MAKE_HOOK_MATCH(SongUpdate, &AudioTimeSyncController::Update, void,
                 AudioTimeSyncController* self) {
   SongUpdate(self);
-
-  for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
-    il2cpp_utils::getLogger().info("[ImageFactory] Path %s",
-                                   pair.first->path.c_str());
-    il2cpp_utils::getLogger().info("[ImageFactory] PO %s",
-                                   pair.first->presentationoption.c_str());
-  }
 }
 
 MAKE_HOOK_MATCH(PauseStart, &PauseMenuManager::ShowMenu, void,
