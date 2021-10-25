@@ -1,4 +1,4 @@
-#include "UI/NewImageViewController.hpp"
+#include "UI/EditImageViewController.hpp"
 
 #include <iostream>
 #include <vector>
@@ -23,7 +23,6 @@
 #include "main.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/Backgroundable.hpp"
-#include "questui/shared/CustomTypes/Components/ExternalComponents.hpp"
 #include "questui/shared/QuestUI.hpp"
 
 using namespace HMUI;
@@ -33,20 +32,12 @@ using namespace QuestUI::BeatSaberUI;
 using namespace TMPro;
 using namespace ImageFactory::Presentors;
 
-DEFINE_TYPE(ImageFactory::ViewControllers, NewImageViewController);
+DEFINE_TYPE(ImageFactory::ViewControllers, EditImageViewController);
 
-custom_types::Helpers::Coroutine SpawnModal(HMUI::ModalView* modal,
-                                            HMUI::ModalView* dummy) {
-  co_yield reinterpret_cast<System::Collections::IEnumerator*>(
-      CRASH_UNLESS(WaitForSeconds::New_ctor(0.5)));
-  modal->Show(false, false, nullptr);
-  co_return;
-}
+bool didEditDeactivate = false;
 
-bool didDeactivate = false;
-
-custom_types::Helpers::Coroutine NewImageViewController::UpdateImage() {
-  while (!didDeactivate) {
+custom_types::Helpers::Coroutine EditImageViewController::UpdateImage() {
+  while (!didEditDeactivate) {
     image->x = image->screen->get_transform()->get_localPosition().x;
     image->y = image->screen->get_transform()->get_localPosition().y;
     image->z = image->screen->get_transform()->get_localPosition().z;
@@ -61,36 +52,22 @@ custom_types::Helpers::Coroutine NewImageViewController::UpdateImage() {
   co_return;
 }
 
-HMUI::SimpleTextDropdown* results_when;
-HMUI::SimpleTextDropdown* percent_when;
-QuestUI::IncrementSetting* percent_percent;
-QuestUI::IncrementSetting* percent_range_above;
-QuestUI::IncrementSetting* percent_range_below;
-QuestUI::IncrementSetting* combo_on_combo;
-QuestUI::IncrementSetting* combo_duration;
-QuestUI::IncrementSetting* combo_inc_every_combo;
-QuestUI::IncrementSetting* combo_inc_duration;
-HMUI::SimpleTextDropdown* combo_hold_when;
-QuestUI::IncrementSetting* combo_hold_combo;
-QuestUI::IncrementSetting* combo_drop_duration;
-QuestUI::IncrementSetting* last_note_duration;
-
-void NewImageViewController::DidActivate(bool firstActivation,
-                                         bool addedToHierarchy,
-                                         bool screenSystemEnabling) {
+void EditImageViewController::DidActivate(bool firstActivation,
+                                          bool addedToHierarchy,
+                                          bool screenSystemEnabling) {
   if (firstActivation) {
     if (!get_gameObject()) return;
-    didDeactivate = false;
+    didEditDeactivate = false;
 
     get_gameObject()->AddComponent<Touchable*>();
 
     GameObject* mainLayout = GameObject::New_ctor();
     RectTransform* parent = mainLayout->AddComponent<RectTransform*>();
     parent->SetParent(get_transform(), false);
-    // parent->set_localPosition(UnityEngine::Vector3(0.0f, 0.0f));
+    parent->set_localPosition(UnityEngine::Vector3(38.0f, 0.0f));
 
     il2cpp_utils::getLogger().info("[ImageFactory] Rendering Image...");
-    image->Render();
+    image->SpawnEditorDummy();
     GameObject* container =
         QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(
             this->get_transform());
@@ -165,12 +142,30 @@ void NewImageViewController::DidActivate(bool firstActivation,
     contentSizeFitter1->set_verticalFit(
         UnityEngine::UI::ContentSizeFitter::FitMode::MinSize);
 
+    HMUI::SimpleTextDropdown* results_when;
+    HMUI::SimpleTextDropdown* percent_when;
+    QuestUI::IncrementSetting* percent_percent;
+    QuestUI::IncrementSetting* percent_range_above;
+    QuestUI::IncrementSetting* percent_range_below;
+    QuestUI::IncrementSetting* combo_on_combo;
+    QuestUI::IncrementSetting* combo_duration;
+    QuestUI::IncrementSetting* combo_inc_every_combo;
+    QuestUI::IncrementSetting* combo_inc_duration;
+    HMUI::SimpleTextDropdown* combo_hold_when;
+    QuestUI::IncrementSetting* combo_hold_combo;
+    QuestUI::IncrementSetting* combo_drop_duration;
+    QuestUI::IncrementSetting* last_note_duration;
+
     auto dropDown = BeatSaberUI::CreateDropdown(
         optionsElement->get_transform(), "Presentation Options",
         image->presentationoption,
         ImageFactory::Presentors::PresentorManager::SET,
         [this, optionsElement, optionsLayout, optionsLayoutTransform, bg1,
-         contentSizeFitter1](std::string_view s) mutable -> void {
+         contentSizeFitter1, results_when, percent_when, percent_percent,
+         percent_range_above, percent_range_below, combo_on_combo,
+         combo_duration, combo_inc_every_combo, combo_inc_duration,
+         combo_hold_when, combo_hold_combo, combo_drop_duration,
+         last_note_duration](std::string_view s) mutable -> void {
           image->presentationoption = to_utf8(to_utf16(s));
           Presentors::PresentorManager::Parse(
               image, il2cpp_utils::createcsstr(to_utf8(to_utf16(s))));
@@ -387,72 +382,37 @@ void NewImageViewController::DidActivate(bool firstActivation,
 
     auto cancelButton = BeatSaberUI::CreateUIButton(
         this->get_transform(), "", Vector2(-22.0f, -38.0f),
-        Vector2(40.0f, 8.0f), [this]() {
-          Presentors::PresentorManager::ClearInfo(image);
-          image->Despawn();
-          UnityEngine::Object::Destroy(image);
-          leaveViewController();
-        });
+        Vector2(40.0f, 8.0f), [this]() { leaveViewController(); });
     QuestUI::BeatSaberUI::CreateText(cancelButton->get_transform(), "CANCEL")
         ->set_alignment(TMPro::TextAlignmentOptions::Center);
     auto saveButton = BeatSaberUI::CreateUIButton(
         this->get_transform(), "", Vector2(22.0f, -38.0f), Vector2(40.0f, 8.0f),
         [this]() {
           ConfigDocument& configDoc = getPluginConfig().config->config;
-          rapidjson::Document::AllocatorType& allocator =
-              getPluginConfig().config->config.GetAllocator();
-          rapidjson::Value configObj;
-          configObj.SetObject();
-          configObj.AddMember("x", image->x, allocator);
-          configObj.AddMember("y", image->y, allocator);
-          configObj.AddMember("z", image->z, allocator);
-          configObj.AddMember("angleX",
-                              image->screen->get_transform()
-                                  ->get_rotation()
-                                  .get_eulerAngles()
-                                  .x,
-                              allocator);
-          configObj.AddMember("angleY",
-                              image->screen->get_transform()
-                                  ->get_rotation()
-                                  .get_eulerAngles()
-                                  .y,
-                              allocator);
-          configObj.AddMember("angleZ",
-                              image->screen->get_transform()
-                                  ->get_rotation()
-                                  .get_eulerAngles()
-                                  .z,
-                              allocator);
-          configObj.AddMember("scaleX", image->scaleX, allocator);
-          configObj.AddMember("scaleY", image->scaleY, allocator);
-          configObj.AddMember("width", image->width, allocator);
-          configObj.AddMember("height", image->height, allocator);
-          configObj.AddMember("name", image->name, allocator);
-          configObj.AddMember("presentationOption", image->presentationoption,
-                              allocator);
-          configObj.AddMember("enabled", image->enabled, allocator);
-          configObj.AddMember("path", image->path, allocator);
-          configDoc.AddMember(
-              rapidjson::Value(
-                  image->fileName + "_" +
-                      std::to_string(getPluginConfig().Amount.GetValue() + 1),
-                  allocator)
-                  .Move(),
-              configObj, allocator);
-          getPluginConfig().config->Write();
-          getPluginConfig().config->Reload();
-          std::string s = getPluginConfig().Images.GetValue();
-          getPluginConfig().Images.SetValue(
-              s + "/" + image->fileName + "_" +
-              std::to_string(getPluginConfig().Amount.GetValue() + 1));
-          getPluginConfig().Amount.SetValue(
-              getPluginConfig().Amount.GetValue() + 1);
-          image->internalName =
-              image->fileName + "_" +
-              std::to_string(getPluginConfig().Amount.GetValue());
-          PresentorManager::Parse(
-              image, il2cpp_utils::createcsstr(image->presentationoption));
+          if (configDoc.HasMember(image->internalName)) {
+            rapidjson::Value& configValue = configDoc[image->internalName];
+            configValue["x"].SetFloat(image->x);
+            configValue["y"].SetFloat(image->y);
+            configValue["z"].SetFloat(image->z);
+            configValue["angleX"].SetFloat(image->angleX);
+            configValue["angleY"].SetFloat(image->angleY);
+            configValue["angleZ"].SetFloat(image->angleZ);
+            configValue["scaleX"].SetFloat(image->scaleX);
+            configValue["scaleY"].SetFloat(image->scaleY);
+            configValue["width"].SetFloat(image->width);
+            configValue["height"].SetFloat(image->height);
+            configValue["name"].SetString(image->name.c_str(),
+                                          configDoc.GetAllocator());
+            configValue["presentationOption"].SetString(
+                image->presentationoption.c_str(), configDoc.GetAllocator());
+            configValue["path"].SetString(image->path.c_str(),
+                                          configDoc.GetAllocator());
+            configValue["enabled"].SetBool(image->enabled);
+            PresentorManager::Parse(
+                image, il2cpp_utils::createcsstr(image->presentationoption));
+            getPluginConfig().config->Write();
+            getPluginConfig().config->Reload();
+          }
           hasSaved = true;
           leaveViewController();
         });
@@ -464,32 +424,14 @@ void NewImageViewController::DidActivate(bool firstActivation,
           custom_types::Helpers::CoroutineHelper::New(UpdateImage())));
 }
 
-void NewImageViewController::DidDeactivate(bool removedFromHierarchy,
-                                           bool screenSystemEnabling) {
-  didDeactivate = true;
-  if (image) {
-    if (!hasSaved) {
-      Presentors::PresentorManager::ClearInfo(image);
-      image->Despawn();
-      UnityEngine::Object::Destroy(image);
-    }
-  }
+void EditImageViewController::DidDeactivate(bool removedFromHierarchy,
+                                            bool screenSystemEnabling) {
+  didEditDeactivate = true;
 }
 
-void NewImageViewController::Initialize(Il2CppString* s) {
-  il2cpp_utils::getLogger().info("[IF] initializing vars");
-  path = to_utf8(csstrtostr(s));
-  il2cpp_utils::getLogger().info("[IF] set path");
-  std::optional<ImageFactory::Components::IFImage*> o =
-      il2cpp_utils::New<ImageFactory::Components::IFImage*>(
-          BeatSaberUI::FileToSprite(path), s);
-  if (o.has_value()) {
-    image = o.value();
-    il2cpp_utils::getLogger().info("[IF] set image");
-  } else {
-    il2cpp_utils::getLogger().info("[IF] couldnt create Image");
-    return;
-  }
+void EditImageViewController::Initialize(
+    ImageFactory::Components::IFImage* image) {
+  this->image = image;
   hasSaved = false;
   il2cpp_utils::getLogger().info("[IF] complete");
 }

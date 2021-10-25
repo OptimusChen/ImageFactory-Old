@@ -1,8 +1,10 @@
 #include "UI/ImageEditingViewController.hpp"
 
 #include "../include/PluginConfig.hpp"
+#include "Components/IFImage.hpp"
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "HMUI/Touchable.hpp"
+#include "Presenters/PresentorManager.hpp"
 #include "TMPro/TextAlignmentOptions.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/RectTransform.hpp"
@@ -18,6 +20,8 @@
 using namespace HMUI;
 using namespace UnityEngine;
 using namespace ImageFactory::ViewControllers;
+using namespace ImageFactory::Components;
+using namespace ImageFactory::Presentors;
 using namespace QuestUI::BeatSaberUI;
 using namespace TMPro;
 
@@ -113,8 +117,13 @@ void ImageEditingViewController::DidActivate(bool firstActivation,
           levelBarLayoutElement->set_minHeight(1.0f);
           auto deleteButton = QuestUI::BeatSaberUI::CreateUIButton(
               levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
-              Vector2(12.0f, 9.0f), []() {
-
+              Vector2(12.0f, 9.0f), [this, fileName]() {
+                for (std::pair<IFImage*, std::string> pair :
+                     *PresentorManager::MAP) {
+                  if (pair.first->internalName.compare(fileName) == 0) {
+                    deleteImageFunction(pair.first);
+                  }
+                }
               });
           auto deleteText = QuestUI::BeatSaberUI::CreateText(
               deleteButton->get_transform(), "X");
@@ -122,8 +131,13 @@ void ImageEditingViewController::DidActivate(bool firstActivation,
           deleteText->set_color(Color(1.0f, 0.0f, 0.0f, 1.0f));
           auto editButton = QuestUI::BeatSaberUI::CreateUIButton(
               levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
-              Vector2(12.0f, 9.0f), []() {
-
+              Vector2(12.0f, 9.0f), [this, fileName]() {
+                for (std::pair<IFImage*, std::string> pair :
+                     *PresentorManager::MAP) {
+                  if (pair.first->internalName.compare(fileName) == 0) {
+                    editImageFunction(pair.first);
+                  }
+                }
               });
           auto editText = QuestUI::BeatSaberUI::CreateText(
               editButton->get_transform(), "<-");
@@ -139,4 +153,14 @@ void ImageEditingViewController::Refresh() {
   UnityEngine::Object::Destroy(scrollableList);
   UnityEngine::Object::Destroy(listBG);
   UnityEngine::Object::Destroy(listBar);
+}
+
+void ImageEditingViewController::set_editImageFunction(
+    std::function<void(ImageFactory::Components::IFImage*)> editImage) {
+  this->editImageFunction = editImage;
+}
+
+void ImageEditingViewController::set_deleteImageFunction(
+    std::function<void(ImageFactory::Components::IFImage*)> deleteImage) {
+  this->deleteImageFunction = deleteImage;
 }

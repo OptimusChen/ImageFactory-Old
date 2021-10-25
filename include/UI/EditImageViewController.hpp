@@ -7,7 +7,8 @@
 #include "main.hpp"
 
 DECLARE_CLASS_CODEGEN(
-    ImageFactory::ViewControllers, NewImageViewController, HMUI::ViewController,
+    ImageFactory::ViewControllers, EditImageViewController,
+    HMUI::ViewController,
     DECLARE_OVERRIDE_METHOD(void, DidActivate,
                             il2cpp_utils::FindMethodUnsafe("HMUI",
                                                            "ViewController",
@@ -23,6 +24,6 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_FIELD(bool, hasSaved); public
     : std::string path;
     std::function<void()> leaveViewController;
-    void Initialize(Il2CppString* str);
+    void Initialize(ImageFactory::Components::IFImage* image);
     custom_types::Helpers::Coroutine UpdateImage();
     DECLARE_INSTANCE_FIELD(ImageFactory::Components::IFImage*, image););

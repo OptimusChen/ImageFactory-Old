@@ -28,6 +28,7 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_METHOD(void, Render);
     DECLARE_INSTANCE_METHOD(void, Spawn);
     DECLARE_INSTANCE_METHOD(void, Despawn);
+    DECLARE_INSTANCE_METHOD(void, SpawnEditorDummy);
     DECLARE_INSTANCE_METHOD(void, Update); DECLARE_INSTANCE_FIELD(float, width);
     DECLARE_INSTANCE_FIELD(float, height); DECLARE_INSTANCE_FIELD(float, x);
     DECLARE_INSTANCE_FIELD(float, y); DECLARE_INSTANCE_FIELD(float, z);
@@ -46,5 +47,9 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_FIELD(Array<VRUIControls::VRPointer*>*, pointerArray);
     DECLARE_CTOR(ctor, UnityEngine::Sprite* sprite, Il2CppString* path); public
     : std::string name;
-    std::string fileName; std::string path; std::string presentationoption;
-    bool enabled; custom_types::Helpers::Coroutine UpdateEveryTick();)
+    std::unordered_map<std::string, std::string> * extraData;
+    std::string internalName; std::string fileName; std::string path;
+    std::string presentationoption; bool enabled;
+    void SetExtraData(std::string key, std::string val);
+    std::string GetExtraData(std::string key, std::string defaultVal);
+    custom_types::Helpers::Coroutine UpdateEveryTick();)

@@ -37,7 +37,11 @@ void PresentorManager::Parse(ImageFactory::Components::IFImage* image,
   image->presentationoption;
   MAP->insert({image, to_utf8(csstrtostr(str))});
 }
-void PresentorManager::ClearInfo(IFImage* image) { MAP->erase(image); }
+void PresentorManager::ClearInfo(IFImage* image) {
+  if (MAP->contains(image)) {
+    MAP->erase(image);
+  }
+}
 void PresentorManager::SpawnInMenu() {
   for (std::pair<IFImage*, std::string> pair : *MAP) {
     if (pair.second.compare(EVERYWHERE) == 0 ||

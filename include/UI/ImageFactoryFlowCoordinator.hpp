@@ -1,4 +1,5 @@
 #pragma once
+#include "Components/IFImage.hpp"
 #include "HMUI/FlowCoordinator.hpp"
 #include "HMUI/ViewController.hpp"
 #include "UI/ImageCreationViewController.hpp"
@@ -28,4 +29,6 @@ DECLARE_CLASS_CODEGEN(
         il2cpp_utils::FindMethodUnsafe("HMUI", "FlowCoordinator",
                                        "BackButtonWasPressed", 1),
         HMUI::ViewController* topViewController);
-    void AddedImage(std::string););
+    void AddedImage(std::string);
+    void EditImage(ImageFactory::Components::IFImage* image);
+    void DeleteImage(ImageFactory::Components::IFImage* image););

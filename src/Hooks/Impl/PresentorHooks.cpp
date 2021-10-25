@@ -4,6 +4,8 @@
 #include "GlobalNamespace/LevelCompletionResults.hpp"
 #include "GlobalNamespace/MainMenuViewController.hpp"
 #include "GlobalNamespace/NoteController.hpp"
+#include "GlobalNamespace/NoteData.hpp"
+#include "GlobalNamespace/NoteWasCutDelegate.hpp"
 #include "GlobalNamespace/PauseAnimationController.hpp"
 #include "GlobalNamespace/PauseController.hpp"
 #include "GlobalNamespace/PauseMenuManager.hpp"
@@ -13,6 +15,8 @@
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "Presenters/PresentorManager.hpp"
 #include "System/Action_1.hpp"
+#include "System/Action_2.hpp"
+#include "System/Action_3.hpp"
 #include "System/Threading/Tasks/Task.hpp"
 #include "System/Threading/Tasks/TaskStatus.hpp"
 #include "System/Threading/Tasks/Task_1.hpp"
@@ -26,21 +30,21 @@
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/QuestUI.hpp"
 
+typedef System::Action_2<GlobalNamespace::NoteData*, int>* NoteMissDelegate;
+
 using namespace UnityEngine;
 using namespace GlobalNamespace;
 using namespace ImageFactory::Presentors;
 using namespace ImageFactory::Hooks;
 
-std::vector<SafePtr<IFImage*>> v;
-// std::optional<ImageFactory::Components::IFImage*> o =
-//     il2cpp_utils::New<ImageFactory::Components::IFImage*>(
-//         BeatSaberUI::FileToSprite(configValue["path"].GetString()),
-//         il2cpp_utils::createcsstr(configValue["path"].GetString()));
-
+UnityEngine::GameObject* GO;
 void createImagesFromConfig() {
+  GO = GameObject::New_ctor(
+      il2cpp_utils::createcsstr("IFIMAGEGO", il2cpp_utils::StringType::Manual));
   std::string s = getPluginConfig().Images.GetValue();
   Il2CppString* csstr = il2cpp_utils::createcsstr(s);
   ConfigDocument& config = getPluginConfig().config->config;
+  il2cpp_utils::getLogger().info("[IF] test2");
   for (int i = 0; i < csstr->Split('/')->get_Length(); i++) {
     Il2CppString* csfileName = csstr->Split('/')->get(i);
     std::string fileName = to_utf8(csstrtostr(csfileName));
@@ -48,10 +52,6 @@ void createImagesFromConfig() {
       if (config.HasMember(fileName)) {
         rapidjson::Value& configValue = config[fileName];
         il2cpp_utils::getLogger().info("[IF] test1");
-        static auto goName =
-            il2cpp_utils::createcsstr("GO", il2cpp_utils::StringType::Manual);
-        il2cpp_utils::getLogger().info("[IF] test2");
-        UnityEngine::GameObject* GO = GameObject::New_ctor(goName);
         il2cpp_utils::getLogger().info("[IF] test3");
         IFImage* image = GO->AddComponent<IFImage*>();
         image->ctor(BeatSaberUI::FileToSprite(
@@ -69,6 +69,7 @@ void createImagesFromConfig() {
           il2cpp_utils::getLogger().info("[IF] test6");
           image->Render();
           il2cpp_utils::getLogger().info("[IF] test7");
+          image->internalName = image->fileName + "_" + std::to_string(i);
           image->sprite =
               BeatSaberUI::FileToSprite(configValue["path"].GetString());
           image->path = configValue["path"].GetString();
@@ -102,46 +103,7 @@ void createImagesFromConfig() {
   }
 
   PresentorManager::SpawnInMenu();
-}
-
-void reAssignVars() {
-  // std::string s = getPluginConfig().Images.GetValue();
-  // Il2CppString* csstr = il2cpp_utils::createcsstr(s);
-  // ConfigDocument& config = getPluginConfig().config->config;
-  // for (int i = 0; i < csstr->Split('/')->get_Length(); i++) {
-  //   Il2CppString* csfileName = csstr->Split('/')->get(i);
-  //   std::string fileName = to_utf8(csstrtostr(csfileName));
-  //   if (fileName.compare("") == 1) {
-  //     SafePtr<IFImage> image = v.at(i);
-  //     il2cpp_utils::getLogger().info("[ImageFactory] %s",
-  //     (fileName).c_str()); if (config.HasMember(fileName)) {
-  //       rapidjson::Value& configValue = config[fileName];
-  //       if (image) {
-  //         image->sprite =
-  //             BeatSaberUI::FileToSprite(configValue["path"].GetString());
-  //         image->path = configValue["path"].GetString();
-  //         image->x = configValue["x"].GetFloat();
-  //         image->y = configValue["y"].GetFloat();
-  //         image->z = configValue["z"].GetFloat();
-  //         image->angleX = configValue["angleX"].GetFloat();
-  //         image->angleY = configValue["angleY"].GetFloat();
-  //         image->angleZ = configValue["angleZ"].GetFloat();
-  //         image->scaleX = configValue["scaleX"].GetFloat();
-  //         image->scaleY = configValue["scaleY"].GetFloat();
-  //         image->width = configValue["width"].GetFloat();
-  //         image->height = configValue["height"].GetFloat();
-  //         image->name = configValue["name"].GetString();
-  //         image->presentationoption =
-  //             configValue["presentationOption"].GetString();
-  //         image->enabled = configValue["enabled"].GetBool();
-  //         image->path = configValue["path"].GetString();
-  //         PresentorManager::Parse(
-  //             v.at(i),
-  //             il2cpp_utils::createcsstr(image->presentationoption));
-  //       }
-  //     }
-  //   }
-  // }
+  GO->SetActive(false);
 }
 
 MAKE_HOOK_MATCH(ResultsViewController_DidActivate,
@@ -154,7 +116,7 @@ MAKE_HOOK_MATCH(ResultsViewController_DidActivate,
 
 custom_types::Helpers::Coroutine WaitForMenuLoad() {
   co_yield reinterpret_cast<System::Collections::IEnumerator*>(
-      CRASH_UNLESS(WaitForSeconds::New_ctor(0.5)));
+      CRASH_UNLESS(WaitForSeconds::New_ctor(2.0f)));
   createImagesFromConfig();
   co_return;
 }
@@ -165,14 +127,13 @@ MAKE_HOOK_MATCH(MainMenuViewController_DidActivate,
                 &MainMenuViewController::DidActivate, void,
                 MainMenuViewController* self, bool firstActivation,
                 bool addedToHierarchy, bool screenSystemEnabling) {
-  MainMenuViewController_DidActivate(self, firstActivation, addedToHierarchy,
-                                     screenSystemEnabling);
-  if (!hasLoadedImagesFromConfig) {
-    hasLoadedImagesFromConfig = true;
+  if (PresentorManager::MAP->size() == 0) {
     GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
         reinterpret_cast<custom_types::Helpers::enumeratorT*>(
             custom_types::Helpers::CoroutineHelper::New(WaitForMenuLoad())));
   }
+  MainMenuViewController_DidActivate(self, firstActivation, addedToHierarchy,
+                                     screenSystemEnabling);
 }
 
 MAKE_HOOK_MATCH(SongEnd, &StandardLevelScenesTransitionSetupDataSO::Finish,
@@ -218,8 +179,8 @@ MAKE_HOOK_MATCH(ScoreController_Update, &ScoreController::Update, void,
 MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
                 AudioTimeSyncController* self, float startTimeOffset) {
   il2cpp_utils::getLogger().info("[ImageFactory] Reassigning Vars");
-  reAssignVars();
   il2cpp_utils::getLogger().info("[ImageFactory] Despawning Presentors");
+  // CRASH_UNLESS(false);
   for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
     il2cpp_utils::getLogger().info("[ImageFactory] test2");
 
@@ -229,6 +190,7 @@ MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
     // UnityEngine::GameObject::Destroy(pair.first->screen);
   }
 
+  PresentorManager::DeSpawnforAll(PresentorManager::IN_MENU);
   il2cpp_utils::getLogger().info("[ImageFactory] Spawning In Song");
   PresentorManager::SpawnforAll(PresentorManager::IN_SONG);
   il2cpp_utils::getLogger().info("[ImageFactory] Spawning Everywhere");
@@ -246,7 +208,6 @@ MAKE_HOOK_MATCH(SongUpdate, &AudioTimeSyncController::Update, void,
 
 MAKE_HOOK_MATCH(PauseStart, &PauseMenuManager::ShowMenu, void,
                 PauseMenuManager* self) {
-  reAssignVars();
   PresentorManager::SpawnforAll(PresentorManager::IN_PAUSE);
   PauseStart(self);
 }
