@@ -35,6 +35,19 @@ using namespace ImageFactory::Presentors;
 DEFINE_TYPE(ImageFactory::ViewControllers, EditImageViewController);
 
 bool didEditDeactivate = false;
+HMUI::SimpleTextDropdown* results_when1;
+HMUI::SimpleTextDropdown* percent_when1;
+QuestUI::IncrementSetting* percent_percent1;
+QuestUI::IncrementSetting* percent_range_above1;
+QuestUI::IncrementSetting* percent_range_below1;
+QuestUI::IncrementSetting* combo_on_combo1;
+QuestUI::IncrementSetting* combo_duration1;
+QuestUI::IncrementSetting* combo_inc_every_combo1;
+QuestUI::IncrementSetting* combo_inc_duration1;
+HMUI::SimpleTextDropdown* combo_hold_when1;
+QuestUI::IncrementSetting* combo_hold_combo1;
+QuestUI::IncrementSetting* combo_drop_duration1;
+QuestUI::IncrementSetting* last_note_duration1;
 
 custom_types::Helpers::Coroutine EditImageViewController::UpdateImage() {
   while (!didEditDeactivate) {
@@ -142,30 +155,12 @@ void EditImageViewController::DidActivate(bool firstActivation,
     contentSizeFitter1->set_verticalFit(
         UnityEngine::UI::ContentSizeFitter::FitMode::MinSize);
 
-    HMUI::SimpleTextDropdown* results_when;
-    HMUI::SimpleTextDropdown* percent_when;
-    QuestUI::IncrementSetting* percent_percent;
-    QuestUI::IncrementSetting* percent_range_above;
-    QuestUI::IncrementSetting* percent_range_below;
-    QuestUI::IncrementSetting* combo_on_combo;
-    QuestUI::IncrementSetting* combo_duration;
-    QuestUI::IncrementSetting* combo_inc_every_combo;
-    QuestUI::IncrementSetting* combo_inc_duration;
-    HMUI::SimpleTextDropdown* combo_hold_when;
-    QuestUI::IncrementSetting* combo_hold_combo;
-    QuestUI::IncrementSetting* combo_drop_duration;
-    QuestUI::IncrementSetting* last_note_duration;
-
     auto dropDown = BeatSaberUI::CreateDropdown(
         optionsElement->get_transform(), "Presentation Options",
         image->presentationoption,
         ImageFactory::Presentors::PresentorManager::SET,
         [this, optionsElement, optionsLayout, optionsLayoutTransform, bg1,
-         contentSizeFitter1, results_when, percent_when, percent_percent,
-         percent_range_above, percent_range_below, combo_on_combo,
-         combo_duration, combo_inc_every_combo, combo_inc_duration,
-         combo_hold_when, combo_hold_combo, combo_drop_duration,
-         last_note_duration](std::string_view s) mutable -> void {
+         contentSizeFitter1](std::string_view s) mutable -> void {
           image->presentationoption = to_utf8(to_utf16(s));
           Presentors::PresentorManager::Parse(
               image, il2cpp_utils::createcsstr(to_utf8(to_utf16(s))));
@@ -208,125 +203,125 @@ void EditImageViewController::DidActivate(bool firstActivation,
               il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>(
                   "Label");
 
-          if (results_when) {
-            results_when->get_gameObject()->SetActive(false);
-            results_when->get_transform()
+          if (results_when1) {
+            results_when1->get_gameObject()->SetActive(false);
+            results_when1->get_transform()
                 ->GetParent()
                 ->get_transform()
                 ->Find(labelName)
                 ->get_gameObject()
                 ->SetActive(false);
           }
-          if (percent_when) {
-            percent_when->get_gameObject()->SetActive(false);
-            percent_when->get_transform()
+          if (percent_when1) {
+            percent_when1->get_gameObject()->SetActive(false);
+            percent_when1->get_transform()
                 ->GetParent()
                 ->get_transform()
                 ->Find(labelName)
                 ->get_gameObject()
                 ->SetActive(false);
           }
-          if (percent_percent) {
-            percent_percent->get_gameObject()->SetActive(false);
+          if (percent_percent1) {
+            percent_percent1->get_gameObject()->SetActive(false);
           }
-          if (percent_range_above) {
-            percent_range_above->get_gameObject()->SetActive(false);
+          if (percent_range_above1) {
+            percent_range_above1->get_gameObject()->SetActive(false);
           }
-          if (percent_range_below) {
-            percent_range_below->get_gameObject()->SetActive(false);
+          if (percent_range_below1) {
+            percent_range_below1->get_gameObject()->SetActive(false);
           }
-          if (combo_on_combo) {
-            combo_on_combo->get_gameObject()->SetActive(false);
+          if (combo_on_combo1) {
+            combo_on_combo1->get_gameObject()->SetActive(false);
           }
-          if (combo_duration) {
-            combo_duration->get_gameObject()->SetActive(false);
+          if (combo_duration1) {
+            combo_duration1->get_gameObject()->SetActive(false);
           }
-          if (combo_inc_every_combo) {
-            combo_inc_every_combo->get_gameObject()->SetActive(false);
+          if (combo_inc_every_combo1) {
+            combo_inc_every_combo1->get_gameObject()->SetActive(false);
           }
-          if (combo_inc_duration) {
-            combo_inc_duration->get_gameObject()->SetActive(false);
+          if (combo_inc_duration1) {
+            combo_inc_duration1->get_gameObject()->SetActive(false);
           }
-          if (combo_hold_when) {
-            combo_hold_when->get_gameObject()->SetActive(false);
-            combo_hold_when->get_transform()
+          if (combo_hold_when1) {
+            combo_hold_when1->get_gameObject()->SetActive(false);
+            combo_hold_when1->get_transform()
                 ->GetParent()
                 ->get_transform()
                 ->Find(labelName)
                 ->get_gameObject()
                 ->SetActive(false);
           }
-          if (combo_hold_combo) {
-            combo_hold_combo->get_gameObject()->SetActive(false);
+          if (combo_hold_combo1) {
+            combo_hold_combo1->get_gameObject()->SetActive(false);
           }
-          if (combo_drop_duration) {
-            combo_drop_duration->get_gameObject()->SetActive(false);
+          if (combo_drop_duration1) {
+            combo_drop_duration1->get_gameObject()->SetActive(false);
           }
-          if (last_note_duration) {
-            last_note_duration->get_gameObject()->SetActive(false);
+          if (last_note_duration1) {
+            last_note_duration1->get_gameObject()->SetActive(false);
           }
 
           if (image->presentationoption.compare(
                   PresentorManager::RESULTS_SCREEN) == 0) {
-            results_when = QuestUI::BeatSaberUI::CreateDropdown(
+            results_when1 = QuestUI::BeatSaberUI::CreateDropdown(
                 optionsElement->get_transform(), "When",
                 image->GetExtraData("results_when", "Finished"),
                 {"Finished", "Passed", "Failed"}, [this](std::string_view s) {
                   image->SetExtraData("results_when", to_utf8(to_utf16(s)));
                 });
 
-            results_when->get_gameObject()->SetActive(true);
+            results_when1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::PERCENT) == 0) {
-            percent_when = QuestUI::BeatSaberUI::CreateDropdown(
+            percent_when1 = QuestUI::BeatSaberUI::CreateDropdown(
                 optionsElement->get_transform(), "When",
                 image->GetExtraData("percent_when", "Above"),
                 {"Above", "Below"}, [this](std::string_view s) {
                   image->SetExtraData("percent_when", to_utf8(to_utf16(s)));
                 });
-            percent_when->get_gameObject()->SetActive(true);
-            percent_percent = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            percent_when1->get_gameObject()->SetActive(true);
+            percent_percent1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "%", 0, 1.0f,
                 stof(image->GetExtraData("percent_percent", "80")),
                 [this](float f) {
                   image->SetExtraData("percent_percent", std::to_string(f));
                 });
-            percent_percent->get_gameObject()->SetActive(true);
+            percent_percent1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::PERCENT_RANGE) == 0) {
-            percent_range_above = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            percent_range_above1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "When Above (%)", 0, 1.0f,
                 stof(image->GetExtraData("percent_range_above", "90")),
                 [this](float f) {
                   image->SetExtraData("percent_range_above", std::to_string(f));
                 });
-            percent_range_above->get_gameObject()->SetActive(true);
-            percent_range_below = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            percent_range_above1->get_gameObject()->SetActive(true);
+            percent_range_below1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "and Below (%)", 0, 1.0f,
                 stof(image->GetExtraData("percent_range_below", "80")),
                 [this](float f) {
                   image->SetExtraData("percent_range_below", std::to_string(f));
                 });
-            percent_range_below->get_gameObject()->SetActive(true);
+            percent_range_below1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::COMBO) == 0) {
-            combo_on_combo = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            combo_on_combo1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "On Combo", 0, 1.0f,
                 stof(image->GetExtraData("combo_on_combo", "100")),
                 [this](float f) {
                   image->SetExtraData("combo_on_combo", std::to_string(f));
                 });
-            combo_on_combo->get_gameObject()->SetActive(true);
-            combo_duration = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            combo_on_combo1->get_gameObject()->SetActive(true);
+            combo_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
                 stof(image->GetExtraData("combo_duration", "1")),
                 [this](float f) {
                   image->SetExtraData("combo_duration", std::to_string(f));
                 });
-            combo_duration->get_gameObject()->SetActive(true);
+            combo_duration1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::COMBO_INCREMENT) == 0) {
-            combo_inc_every_combo =
+            combo_inc_every_combo1 =
                 QuestUI::BeatSaberUI::CreateIncrementSetting(
                     optionsElement->get_transform(), "On Every X Combo", 0,
                     1.0f,
@@ -335,50 +330,157 @@ void EditImageViewController::DidActivate(bool firstActivation,
                       image->SetExtraData("combo_inc_every_combo",
                                           std::to_string(f));
                     });
-            combo_inc_every_combo->get_gameObject()->SetActive(true);
-            combo_inc_duration = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            combo_inc_every_combo1->get_gameObject()->SetActive(true);
+            combo_inc_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
                 stof(image->GetExtraData("combo_inc_duration", "1")),
                 [this](float f) {
                   image->SetExtraData("combo_inc_duration", std::to_string(f));
                 });
-            combo_inc_duration->get_gameObject()->SetActive(true);
+            combo_inc_duration1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::COMBO_HOLD) == 0) {
-            combo_hold_when = QuestUI::BeatSaberUI::CreateDropdown(
+            combo_hold_when1 = QuestUI::BeatSaberUI::CreateDropdown(
                 optionsElement->get_transform(), "When",
                 image->GetExtraData("combo_hold_when", "Above"),
                 {"Above", "Below"}, [this](std::string_view s) {
                   image->SetExtraData("combo_hold_when", to_utf8(to_utf16(s)));
                 });
-            combo_hold_when->get_gameObject()->SetActive(true);
-            combo_hold_combo = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            combo_hold_when1->get_gameObject()->SetActive(true);
+            combo_hold_combo1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "Combo", 0, 1.0f,
                 stof(image->GetExtraData("combo_hold_combo", "100")),
                 [this](float f) {
                   image->SetExtraData("combo_hold_combo", std::to_string(f));
                 });
-            combo_hold_combo->get_gameObject()->SetActive(true);
+            combo_hold_combo1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::COMBO_DROP) == 0) {
-            combo_drop_duration = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            combo_drop_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
                 stof(image->GetExtraData("combo_drop_duration", "1")),
                 [this](float f) {
                   image->SetExtraData("combo_drop_duration", std::to_string(f));
                 });
-            combo_drop_duration->get_gameObject()->SetActive(true);
+            combo_drop_duration1->get_gameObject()->SetActive(true);
           } else if (image->presentationoption.compare(
                          PresentorManager::LAST_NOTE) == 0) {
-            last_note_duration = QuestUI::BeatSaberUI::CreateIncrementSetting(
+            last_note_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
                 optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
                 stof(image->GetExtraData("last_note_duration", "1")),
                 [this](float f) {
                   image->SetExtraData("last_note_duration", std::to_string(f));
                 });
-            last_note_duration->get_gameObject()->SetActive(true);
+            last_note_duration1->get_gameObject()->SetActive(true);
           }
         });
+
+    if (image->presentationoption.compare(PresentorManager::RESULTS_SCREEN) ==
+        0) {
+      results_when1 = QuestUI::BeatSaberUI::CreateDropdown(
+          optionsElement->get_transform(), "When",
+          image->GetExtraData("results_when", "Finished"),
+          {"Finished", "Passed", "Failed"}, [this](std::string_view s) {
+            image->SetExtraData("results_when", to_utf8(to_utf16(s)));
+          });
+
+      results_when1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(PresentorManager::PERCENT) ==
+               0) {
+      percent_when1 = QuestUI::BeatSaberUI::CreateDropdown(
+          optionsElement->get_transform(), "When",
+          image->GetExtraData("percent_when", "Above"), {"Above", "Below"},
+          [this](std::string_view s) {
+            image->SetExtraData("percent_when", to_utf8(to_utf16(s)));
+          });
+      percent_when1->get_gameObject()->SetActive(true);
+      percent_percent1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "%", 0, 1.0f,
+          stof(image->GetExtraData("percent_percent", "80")), [this](float f) {
+            image->SetExtraData("percent_percent", std::to_string(f));
+          });
+      percent_percent1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(
+                   PresentorManager::PERCENT_RANGE) == 0) {
+      percent_range_above1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "When Above (%)", 0, 1.0f,
+          stof(image->GetExtraData("percent_range_above", "90")),
+          [this](float f) {
+            image->SetExtraData("percent_range_above", std::to_string(f));
+          });
+      percent_range_above1->get_gameObject()->SetActive(true);
+      percent_range_below1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "and Below (%)", 0, 1.0f,
+          stof(image->GetExtraData("percent_range_below", "80")),
+          [this](float f) {
+            image->SetExtraData("percent_range_below", std::to_string(f));
+          });
+      percent_range_below1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(PresentorManager::COMBO) ==
+               0) {
+      combo_on_combo1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "On Combo", 0, 1.0f,
+          stof(image->GetExtraData("combo_on_combo", "100")), [this](float f) {
+            image->SetExtraData("combo_on_combo", std::to_string(f));
+          });
+      combo_on_combo1->get_gameObject()->SetActive(true);
+      combo_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
+          stof(image->GetExtraData("combo_duration", "1")), [this](float f) {
+            image->SetExtraData("combo_duration", std::to_string(f));
+          });
+      combo_duration1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(
+                   PresentorManager::COMBO_INCREMENT) == 0) {
+      combo_inc_every_combo1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "On Every X Combo", 0, 1.0f,
+          stof(image->GetExtraData("combo_inc_every_combo", "100")),
+          [this](float f) {
+            image->SetExtraData("combo_inc_every_combo", std::to_string(f));
+          });
+      combo_inc_every_combo1->get_gameObject()->SetActive(true);
+      combo_inc_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
+          stof(image->GetExtraData("combo_inc_duration", "1")),
+          [this](float f) {
+            image->SetExtraData("combo_inc_duration", std::to_string(f));
+          });
+      combo_inc_duration1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(
+                   PresentorManager::COMBO_HOLD) == 0) {
+      combo_hold_when1 = QuestUI::BeatSaberUI::CreateDropdown(
+          optionsElement->get_transform(), "When",
+          image->GetExtraData("combo_hold_when", "Above"), {"Above", "Below"},
+          [this](std::string_view s) {
+            image->SetExtraData("combo_hold_when", to_utf8(to_utf16(s)));
+          });
+      combo_hold_when1->get_gameObject()->SetActive(true);
+      combo_hold_combo1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "Combo", 0, 1.0f,
+          stof(image->GetExtraData("combo_hold_combo", "100")),
+          [this](float f) {
+            image->SetExtraData("combo_hold_combo", std::to_string(f));
+          });
+      combo_hold_combo1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(
+                   PresentorManager::COMBO_DROP) == 0) {
+      combo_drop_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
+          stof(image->GetExtraData("combo_drop_duration", "1")),
+          [this](float f) {
+            image->SetExtraData("combo_drop_duration", std::to_string(f));
+          });
+      combo_drop_duration1->get_gameObject()->SetActive(true);
+    } else if (image->presentationoption.compare(PresentorManager::LAST_NOTE) ==
+               0) {
+      last_note_duration1 = QuestUI::BeatSaberUI::CreateIncrementSetting(
+          optionsElement->get_transform(), "Duration (Seconds)", 2, 0.25f,
+          stof(image->GetExtraData("last_note_duration", "1")),
+          [this](float f) {
+            image->SetExtraData("last_note_duration", std::to_string(f));
+          });
+      last_note_duration1->get_gameObject()->SetActive(true);
+    }
 
     auto cancelButton = BeatSaberUI::CreateUIButton(
         this->get_transform(), "", Vector2(-22.0f, -38.0f),
@@ -408,6 +510,10 @@ void EditImageViewController::DidActivate(bool firstActivation,
             configValue["path"].SetString(image->path.c_str(),
                                           configDoc.GetAllocator());
             configValue["enabled"].SetBool(image->enabled);
+            std::string extraData;
+            for (std::pair<std::string, std::string> pair : *image->extraData) {
+              extraData = extraData + pair.first + ";" + pair.second + "/";
+            }
             PresentorManager::Parse(
                 image, il2cpp_utils::createcsstr(image->presentationoption));
             getPluginConfig().config->Write();

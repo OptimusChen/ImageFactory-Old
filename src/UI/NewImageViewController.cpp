@@ -433,6 +433,11 @@ void NewImageViewController::DidActivate(bool firstActivation,
                               allocator);
           configObj.AddMember("enabled", image->enabled, allocator);
           configObj.AddMember("path", image->path, allocator);
+          std::string extraData;
+          for (std::pair<std::string, std::string> pair : *image->extraData) {
+            extraData = extraData + pair.first + ";" + pair.second + "/";
+          }
+          configObj.AddMember("extraData", extraData, allocator);
           configDoc.AddMember(
               rapidjson::Value(
                   image->fileName + "_" +

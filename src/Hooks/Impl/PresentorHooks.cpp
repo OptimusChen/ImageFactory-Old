@@ -14,6 +14,7 @@
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "Presenters/PresentorManager.hpp"
+#include "System/Action.hpp"
 #include "System/Action_1.hpp"
 #include "System/Action_2.hpp"
 #include "System/Action_3.hpp"
@@ -21,6 +22,8 @@
 #include "System/Threading/Tasks/TaskStatus.hpp"
 #include "System/Threading/Tasks/Task_1.hpp"
 #include "UnityEngine/AsyncOperation.hpp"
+#include "UnityEngine/Events/UnityAction.hpp"
+#include "UnityEngine/Events/UnityAction_1.hpp"
 #include "UnityEngine/WaitForSeconds.hpp"
 #include "Utils/FileUtils.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
@@ -30,7 +33,8 @@
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/QuestUI.hpp"
 
-typedef System::Action_2<GlobalNamespace::NoteData*, int>* NoteMissDelegate;
+#define MakeDelegate(DelegateType, varName) \
+  (il2cpp_utils::MakeDelegate<DelegateType>(classof(DelegateType), varName))
 
 using namespace UnityEngine;
 using namespace GlobalNamespace;
@@ -88,6 +92,29 @@ void createImagesFromConfig() {
               configValue["presentationOption"].GetString();
           image->enabled = configValue["enabled"].GetBool();
           image->path = configValue["path"].GetString();
+
+          std::string extraData = configValue["extraData"].GetString();
+          if (extraData.compare("") == 1) {
+            Il2CppString* csExtraData = il2cpp_utils::createcsstr(extraData);
+            il2cpp_utils::getLogger().info("[IF] test7.1");
+            ::Array<Il2CppString*>* pairs = csExtraData->Split('/');
+            for (int j = 0; j < pairs->get_Length(); j++) {
+              il2cpp_utils::getLogger().info("[IF] test7.2");
+              Il2CppString* csPair = pairs->get(j);
+
+              if (to_utf8(csstrtostr(csPair)).compare("") == 1) {
+                std::string key =
+                    to_utf8(csstrtostr(csPair->Split(';')->get(0)));
+                std::string val =
+                    to_utf8(csstrtostr(csPair->Split(';')->get(1)));
+
+                il2cpp_utils::getLogger().info("[IF] test7.3");
+                image->SetExtraData(key, val);
+                il2cpp_utils::getLogger().info("[IF] test7.4");
+              }
+            }
+          }
+
           il2cpp_utils::getLogger().info("[IF] test8");
           image->fileName =
               FileUtils::GetFileName(configValue["path"].GetString(), false);
@@ -106,17 +133,23 @@ void createImagesFromConfig() {
   GO->SetActive(false);
 }
 
-MAKE_HOOK_MATCH(ResultsViewController_DidActivate,
-                &GlobalNamespace::ResultsViewController::DidActivate, void,
-                ResultsViewController* self, bool firstActivation,
-                bool addedToHierarchy, bool screenSystemEnabling) {
-  ResultsViewController_DidActivate(self, firstActivation, addedToHierarchy,
-                                    screenSystemEnabling);
+custom_types::Helpers::Coroutine DespawnImage(IFImage* image, float delay) {
+  co_yield reinterpret_cast<System::Collections::IEnumerator*>(
+      CRASH_UNLESS(WaitForSeconds::New_ctor(delay)));
+  image->Despawn();
+  co_return;
+}
+
+void DespawnAfterSeconds(IFImage* image, float delay) {
+  GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
+      reinterpret_cast<custom_types::Helpers::enumeratorT*>(
+          custom_types::Helpers::CoroutineHelper::New(
+              DespawnImage(image, delay))));
 }
 
 custom_types::Helpers::Coroutine WaitForMenuLoad() {
   co_yield reinterpret_cast<System::Collections::IEnumerator*>(
-      CRASH_UNLESS(WaitForSeconds::New_ctor(2.0f)));
+      CRASH_UNLESS(WaitForSeconds::New_ctor(0.5f)));
   createImagesFromConfig();
   co_return;
 }
@@ -136,6 +169,33 @@ MAKE_HOOK_MATCH(MainMenuViewController_DidActivate,
                                      screenSystemEnabling);
 }
 
+MAKE_HOOK_MATCH(ResultsViewController_DidActivate,
+                &GlobalNamespace::ResultsViewController::DidActivate, void,
+                ResultsViewController* self, bool firstActivation,
+                bool addedToHierarchy, bool screenSystemEnabling) {
+  ResultsViewController_DidActivate(self, firstActivation, addedToHierarchy,
+                                    screenSystemEnabling);
+  PresentorManager::SpawnforAllWithExtraData(PresentorManager::RESULTS_SCREEN,
+                                             "results_when", "Finished");
+  if (self->levelCompletionResults->energy == 0.0f) {
+    PresentorManager::SpawnforAllWithExtraData(PresentorManager::RESULTS_SCREEN,
+                                               "results_when", "Failed");
+
+  } else {
+    PresentorManager::SpawnforAllWithExtraData(PresentorManager::RESULTS_SCREEN,
+                                               "results_when", "Passed");
+  }
+}
+
+MAKE_HOOK_MATCH(ResultsViewController_DidDeactivate,
+                &GlobalNamespace::ResultsViewController::DidDeactivate, void,
+                ResultsViewController* self, bool removedFromHierarchy,
+                bool screenSystemEnabling) {
+  ResultsViewController_DidDeactivate(self, removedFromHierarchy,
+                                      screenSystemEnabling);
+  PresentorManager::SpawnInMenu();
+}
+
 MAKE_HOOK_MATCH(SongEnd, &StandardLevelScenesTransitionSetupDataSO::Finish,
                 void, StandardLevelScenesTransitionSetupDataSO* self,
                 LevelCompletionResults* levelCompletionResults) {
@@ -148,46 +208,25 @@ MAKE_HOOK_MATCH(SongEnd, &StandardLevelScenesTransitionSetupDataSO::Finish,
     pair.first->inSong = false;
     il2cpp_utils::getLogger().info("[ImageFactory] test3");
     il2cpp_utils::getLogger().info("[ImageFactory] test4");
-    // UnityEngine::GameObject::Destroy(pair.first->inSongImage);
-    // UnityEngine::GameObject::Destroy(pair.first->inSongScreen);
-    il2cpp_utils::getLogger().info("[ImageFactory] test5");
   }
 
   il2cpp_utils::getLogger().info("[ImageFactory] test6");
 }
 
-int combo = 0;
-bool scoreControllerFirstActivation = false;
-
-MAKE_HOOK_MATCH(ScoreController_Update, &ScoreController::Update, void,
+MAKE_HOOK_MATCH(ScoreController_Start, &ScoreController::Start, void,
                 ScoreController* self) {
-  if (self->combo > combo) {
-  }
-  if (self->combo < combo) {
-    PresentorManager::DeSpawnforAll(PresentorManager::FULL_COMBO);
-  }
-  if (self->combo == combo) {
-    if (combo == 0) {
-      if (!scoreControllerFirstActivation) {
+  ScoreController_Start(self);
+  self->add_comboBreakingEventHappenedEvent(MakeDelegate(
+      System::Action*, std::function([]() {
         PresentorManager::DeSpawnforAll(PresentorManager::FULL_COMBO);
-        scoreControllerFirstActivation = true;
-      }
-    }
-  }
-  combo = self->combo;
+      })));
 }
 MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
                 AudioTimeSyncController* self, float startTimeOffset) {
-  il2cpp_utils::getLogger().info("[ImageFactory] Reassigning Vars");
-  il2cpp_utils::getLogger().info("[ImageFactory] Despawning Presentors");
-  // CRASH_UNLESS(false);
   for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
     il2cpp_utils::getLogger().info("[ImageFactory] test2");
 
     pair.first->inSong = true;
-    // NULLPTR BECAUSE MANUALLY DESTROYED
-    // UnityEngine::GameObject::Destroy(pair.first->image);
-    // UnityEngine::GameObject::Destroy(pair.first->screen);
   }
 
   PresentorManager::DeSpawnforAll(PresentorManager::IN_MENU);
@@ -222,10 +261,12 @@ MAKE_HOOK_MATCH(
 
 void PresentorHooks::AddHooks() {
   INSTALL_HOOK(getLogger(), MainMenuViewController_DidActivate);
+  INSTALL_HOOK(getLogger(), ResultsViewController_DidActivate);
+  INSTALL_HOOK(getLogger(), ResultsViewController_DidDeactivate);
   INSTALL_HOOK(getLogger(), SongEnd);
   INSTALL_HOOK(getLogger(), SongStart);
   INSTALL_HOOK(getLogger(), SongUpdate);
   INSTALL_HOOK(getLogger(), PauseAnimationFinish);
   INSTALL_HOOK(getLogger(), PauseStart);
-  INSTALL_HOOK(getLogger(), ScoreController_Update);
+  INSTALL_HOOK(getLogger(), ScoreController_Start);
 }

@@ -77,4 +77,27 @@ void PresentorManager::DeSpawnforAll(std::string str) {
     }
   }
 }
+void PresentorManager::SpawnforAllWithExtraData(std::string str,
+                                                std::string key,
+                                                std::string val) {
+  for (std::pair<IFImage*, std::string> pair : *MAP) {
+    if (pair.second.compare(str) == 0) {
+      if (pair.first->GetExtraData(key, val).compare(val) == 0) {
+        il2cpp_utils::getLogger().info("[ImageFactory] Spawning image");
+        pair.first->Spawn();
+      }
+    }
+  }
+}
+void PresentorManager::DeSpawnforAllWithExtraData(std::string str,
+                                                  std::string key,
+                                                  std::string val) {
+  for (std::pair<IFImage*, std::string> pair : *MAP) {
+    if (pair.second.compare(str) == 0) {
+      if (pair.first->GetExtraData(key, val).compare(val) == 0) {
+        pair.first->Despawn();
+      }
+    }
+  }
+}
 }  // namespace ImageFactory::Presentors

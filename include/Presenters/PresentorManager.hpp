@@ -17,6 +17,10 @@ DECLARE_CLASS_CODEGEN(
         SET;
     static void SpawnforAll(std::string str);
     static void DeSpawnforAll(std::string str);
+    static void SpawnforAllWithExtraData(std::string str, std::string key,
+                                         std::string val);
+    static void DeSpawnforAllWithExtraData(std::string str, std::string key,
+                                           std::string val);
     static std::unordered_map<IFImage*, std::string> * MAP;
     static std::string EVERYWHERE; static std::string IN_MENU;
     static std::string RESULTS_SCREEN; static std::string IN_SONG;
