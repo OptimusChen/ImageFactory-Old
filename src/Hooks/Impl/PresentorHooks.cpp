@@ -1,6 +1,8 @@
 #include "Hooks/Impl/PresentorHooks.hpp"
 
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
+#include "GlobalNamespace/BeatmapData.hpp"
+#include "GlobalNamespace/IDifficultyBeatmap.hpp"
 #include "GlobalNamespace/LevelCompletionResults.hpp"
 #include "GlobalNamespace/MainMenuViewController.hpp"
 #include "GlobalNamespace/NoteController.hpp"
@@ -9,9 +11,11 @@
 #include "GlobalNamespace/PauseAnimationController.hpp"
 #include "GlobalNamespace/PauseController.hpp"
 #include "GlobalNamespace/PauseMenuManager.hpp"
+#include "GlobalNamespace/RelativeScoreAndImmediateRankCounter.hpp"
 #include "GlobalNamespace/ResultsViewController.hpp"
 #include "GlobalNamespace/ScoreController.hpp"
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
+#include "GlobalNamespace/StandardLevelDetailView.hpp"
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "Presenters/PresentorManager.hpp"
 #include "System/Action.hpp"
@@ -141,6 +145,7 @@ custom_types::Helpers::Coroutine DespawnImage(IFImage* image, float delay) {
 }
 
 void DespawnAfterSeconds(IFImage* image, float delay) {
+  image->Spawn();
   GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
       reinterpret_cast<custom_types::Helpers::enumeratorT*>(
           custom_types::Helpers::CoroutineHelper::New(
@@ -213,13 +218,161 @@ MAKE_HOOK_MATCH(SongEnd, &StandardLevelScenesTransitionSetupDataSO::Finish,
   il2cpp_utils::getLogger().info("[ImageFactory] test6");
 }
 
+int currentNoteCount;
+int lastNoteCount;
+
+MAKE_HOOK_MATCH(GetNotes, &StandardLevelDetailView::RefreshContent, void,
+                StandardLevelDetailView* self) {
+  GetNotes(self);
+
+  lastNoteCount = self->selectedDifficultyBeatmap->get_beatmapData()
+                      ->get_cuttableNotesCount();
+}
+
+MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
+                NoteController* self, NoteData* noteData, float worldRotation,
+                UnityEngine::Vector3 moveStartPos,
+                UnityEngine::Vector3 moveEndPos,
+                UnityEngine::Vector3 jumpEndPos, float moveDuration,
+                float jumpDuration, float jumpGravity, float endRotation,
+                float uniformScale) {
+  currentNoteCount++;
+  // il2cpp_utils::getLogger().info("[IF] %i | %i",
+  // currentNoteCount, lastNoteCount);
+  if (currentNoteCount == lastNoteCount) {
+    for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
+      std::string presentationOption = pair.second;
+      IFImage* image = pair.first;
+      if (presentationOption.compare(PresentorManager::LAST_NOTE) == 0) {
+        DespawnAfterSeconds(
+            image, stof(image->GetExtraData("last_note_duration", "1")));
+      }
+    }
+  }
+  NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos,
+                      jumpEndPos, moveDuration, jumpDuration, jumpGravity,
+                      endRotation, uniformScale);
+}
+
 MAKE_HOOK_MATCH(ScoreController_Start, &ScoreController::Start, void,
                 ScoreController* self) {
   ScoreController_Start(self);
   self->add_comboBreakingEventHappenedEvent(MakeDelegate(
       System::Action*, std::function([]() {
         PresentorManager::DeSpawnforAll(PresentorManager::FULL_COMBO);
+        for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
+          std::string presentationOption = pair.second;
+          IFImage* image = pair.first;
+          if (presentationOption.compare(PresentorManager::COMBO_DROP) == 0) {
+            DespawnAfterSeconds(
+                image, stof(image->GetExtraData("combo_drop_duration", "1")));
+          }
+        }
       })));
+  self->add_comboDidChangeEvent(
+      il2cpp_utils::MakeDelegate<System::Action_1<int>*>(
+          classof(System::Action_1<int>*), std::function([self]() {
+            for (std::pair<IFImage*, std::string> pair :
+                 *PresentorManager::MAP) {
+              std::string presentationOption = pair.second;
+              IFImage* image = pair.first;
+              if (presentationOption.compare(PresentorManager::COMBO) == 0) {
+                if ((self->combo ==
+                     stof(image->GetExtraData("combo_on_combo", "100")))) {
+                  DespawnAfterSeconds(
+                      image, stof(image->GetExtraData("combo_duration", "1")));
+                }
+              }
+              if (presentationOption.compare(
+                      PresentorManager::COMBO_INCREMENT) == 0) {
+                if ((self->combo % (int)stof(image->GetExtraData(
+                                       "combo_inc_every_combo", "100"))) == 0) {
+                  if (self->combo > 0) {
+                    DespawnAfterSeconds(image, stof(image->GetExtraData(
+                                                   "combo_inc_duration", "1")));
+                  }
+                }
+              }
+              if (presentationOption.compare(PresentorManager::COMBO_HOLD) ==
+                  0) {
+                if (image->GetExtraData("combo_hold_when", "Above")
+                        .compare("Above") == 0) {
+                  if (self->combo >
+                      stof(image->GetExtraData("combo_hold_combo", "100"))) {
+                    image->Spawn();
+                  } else {
+                    image->Despawn();
+                  }
+                } else if (image->GetExtraData("combo_hold_when", "Below")
+                               .compare("Below") == 0) {
+                  if (self->combo <
+                      stof(image->GetExtraData("combo_hold_combo", "100"))) {
+                    image->Spawn();
+                  } else {
+                    image->Despawn();
+                  }
+                }
+              }
+            }
+          })));
+  auto relativeScoreAndImmediateRankCounter =
+      UnityEngine::Object::FindObjectOfType<
+          RelativeScoreAndImmediateRankCounter*>();
+  relativeScoreAndImmediateRankCounter
+      ->add_relativeScoreOrImmediateRankDidChangeEvent(
+          il2cpp_utils::MakeDelegate<System::Action*>(
+              classof(System::Action*),
+              std::function([self, relativeScoreAndImmediateRankCounter]() {
+                int score =
+                    relativeScoreAndImmediateRankCounter->relativeScore *
+                    100.0f;
+
+                double percentage = (double)score;
+                for (std::pair<IFImage*, std::string> pair :
+                     *PresentorManager::MAP) {
+                  std::string presentationOption = pair.second;
+                  IFImage* image = pair.first;
+                  if (presentationOption.compare(PresentorManager::PERCENT) ==
+                      0) {
+                    if (image->GetExtraData("percent_when", "Above")
+                            .compare("Above") == 0) {
+                      if (percentage > stof(image->GetExtraData(
+                                           "percent_percent", "9999999"))) {
+                        image->Spawn();
+                      } else {
+                        if (percentage > 0.0f) {
+                          image->name.c_str(), percentage,
+                              stof(image->GetExtraData("percent_percent",
+                                                       "9999999"));
+                          image->Despawn();
+                        }
+                      }
+                    } else if (image->GetExtraData("percent_when", "Below")
+                                   .compare("Below") == 0) {
+                      if (percentage < stof(image->GetExtraData(
+                                           "percent_percent", "-9999999"))) {
+                        image->Spawn();
+                      } else {
+                        if (percentage > 0.0f) {
+                          image->Despawn();
+                        }
+                      }
+                    }
+                  } else if (presentationOption.compare(
+                                 PresentorManager::PERCENT_RANGE) == 0) {
+                    if (percentage > stof(image->GetExtraData(
+                                         "percent_range_above", "80")) &&
+                        percentage < stof(image->GetExtraData(
+                                         "percent_range_below", "90"))) {
+                      image->Spawn();
+                    } else {
+                      if (percentage > 0.0f) {
+                        image->Despawn();
+                      }
+                    }
+                  }
+                }
+              })));
 }
 MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
                 AudioTimeSyncController* self, float startTimeOffset) {
@@ -238,6 +391,10 @@ MAKE_HOOK_MATCH(SongStart, &AudioTimeSyncController::StartSong, void,
   PresentorManager::SpawnforAll(PresentorManager::FULL_COMBO);
   il2cpp_utils::getLogger().info("[ImageFactory] Finished");
   SongStart(self, startTimeOffset);
+}
+MAKE_HOOK_MATCH(ScoreController_Update, &ScoreController::Update, void,
+                ScoreController* self) {
+  ScoreController_Update(self);
 }
 
 MAKE_HOOK_MATCH(SongUpdate, &AudioTimeSyncController::Update, void,
@@ -269,4 +426,7 @@ void PresentorHooks::AddHooks() {
   INSTALL_HOOK(getLogger(), PauseAnimationFinish);
   INSTALL_HOOK(getLogger(), PauseStart);
   INSTALL_HOOK(getLogger(), ScoreController_Start);
+  INSTALL_HOOK(getLogger(), ScoreController_Update);
+  INSTALL_HOOK(getLogger(), NoteController_Init);
+  INSTALL_HOOK(getLogger(), GetNotes);
 }

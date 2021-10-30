@@ -36,6 +36,7 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_FIELD(float, angleY);
     DECLARE_INSTANCE_FIELD(float, angleZ);
     DECLARE_INSTANCE_FIELD(float, scaleX);
+    DECLARE_INSTANCE_FIELD(bool, hasSpawned);
     DECLARE_INSTANCE_FIELD(float, scaleY); DECLARE_INSTANCE_FIELD(bool, inSong);
     DECLARE_INSTANCE_FIELD(HMUI::Touchable*, collider);
     DECLARE_INSTANCE_FIELD(UnityEngine::Quaternion*, rot);

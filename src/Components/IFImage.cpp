@@ -33,7 +33,6 @@ float grabDist = 0.0f;
 UnityEngine::Vector3 raycastPos;
 UnityEngine::Quaternion raycastRot;
 bool hasRendered = false;
-bool hasSpawned = false;
 
 float r = 0.0f;
 float g = 0.0f;
@@ -58,74 +57,77 @@ void ImageFactory::Components::IFImage::Render() {
 
 void ImageFactory::Components::IFImage::Despawn() {
   if (!enabled) return;
-  il2cpp_utils::getLogger().info("[ImageFactory] test1");
-  il2cpp_utils::getLogger().info("[ImageFactory] test2");
+  hasSpawned = false;
+  // il2cpp_utils::getLogger().info("[ImageFactory] test1");
+  // il2cpp_utils::getLogger().info("[ImageFactory] test2");
   if (inSongScreen) {
     inSongScreen->get_transform()->set_localPosition(
         Vector3(100.0f, 100.0f, 100.0f));
     inSongScreen->SetActive(false);
 
-    il2cpp_utils::getLogger().info("[ImageFactory] test3");
+    // il2cpp_utils::getLogger().info("[ImageFactory] test3");
   }
-  il2cpp_utils::getLogger().info("[ImageFactory] test4");
+  // il2cpp_utils::getLogger().info("[ImageFactory] test4");
   if (inSongImage) {
-    il2cpp_utils::getLogger().info("[ImageFactory] test5");
+    // il2cpp_utils::getLogger().info("[ImageFactory] test5");
     inSongImage->get_transform()->set_localPosition(
         Vector3(100.0f, 100.0f, 100.0f));
     inSongImage->set_color(Color(r, g, b, 0.0f));
     inSongImage->get_gameObject()->SetActive(false);
   }
 
-  il2cpp_utils::getLogger().info("[ImageFactory] test6");
+  // il2cpp_utils::getLogger().info("[ImageFactory] test6");
 
-  il2cpp_utils::getLogger().info("[ImageFactory] test7");
+  // il2cpp_utils::getLogger().info("[ImageFactory] test7");
   if (screen) {
-    il2cpp_utils::getLogger().info("[ImageFactory] test8");
+    // il2cpp_utils::getLogger().info("[ImageFactory] test8");
     screen->SetActive(false);
-    il2cpp_utils::getLogger().info("[ImageFactory] test8.1");
+    // il2cpp_utils::getLogger().info("[ImageFactory] test8.1");
     screen->get_transform()->set_localPosition(
         Vector3(1000.0f, 1000.0f, 1000.0f));
-    il2cpp_utils::getLogger().info("[ImageFactory] test8.2");
+    // il2cpp_utils::getLogger().info("[ImageFactory] test8.2");
   }
 
-  il2cpp_utils::getLogger().info("[ImageFactory] test9");
+  // il2cpp_utils::getLogger().info("[ImageFactory] test9");
   if (image) {
-    il2cpp_utils::getLogger().info("[ImageFactory] test10");
+    // il2cpp_utils::getLogger().info("[ImageFactory] test10");
     image->get_gameObject()->SetActive(false);
     image->get_transform()->set_localPosition(
         Vector3(1000.0f, 1000.0f, 1000.0f));
     image->set_color(Color(r, g, b, 0.0f));
   }
 
-  il2cpp_utils::getLogger().info("[ImageFactory] test11");
+  // il2cpp_utils::getLogger().info("[ImageFactory] test11");
 }
 void ImageFactory::Components::IFImage::SpawnEditorDummy() {
   UnityEngine::GameObject::Destroy(screen);
   UnityEngine::GameObject::Destroy(image);
 
-  il2cpp_utils::getLogger().info("[ImageFactory] Creating Screen");
+  // il2cpp_utils::getLogger().info("[ImageFactory] Creating Screen");
   screen = BeatSaberUI::CreateFloatingScreen(
       Vector2(scaleX * (width / 3), scaleY * (height / 3)), Vector3(x, y, z),
       Vector3(angleX, angleY, angleZ), 0.0f, false, true, 4);
   UnityEngine::Object::DontDestroyOnLoad(screen);
   screen->SetActive(true);
-  il2cpp_utils::getLogger().info("[ImageFactory] Activated Screen");
+  // il2cpp_utils::getLogger().info("[ImageFactory] Activated Screen");
 
-  il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
+  // il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
   image = BeatSaberUI::CreateImage(
       screen->get_transform(), sprite, Vector2(x, y),
       Vector2(scaleX * (width / 3), scaleY * (height / 3)));
   UnityEngine::Object::DontDestroyOnLoad(image);
-  il2cpp_utils::getLogger().info("[ImageFactory] Finished Creating Image");
+  // il2cpp_utils::getLogger().info("[ImageFactory] Finished Creating Image");
   image->get_gameObject()->SetActive(true);
   image->set_color(Color(r, g, b, 1.0f));
 }
 
 void ImageFactory::Components::IFImage::Spawn() {
   if (!enabled) return;
-  il2cpp_utils::getLogger().info("[ImageFactory] Spawning Image");
-  il2cpp_utils::getLogger().info(
-      "[ImageFactory] Deleting existing images and screens");
+  if (hasSpawned) return;
+  hasSpawned = true;
+  // il2cpp_utils::getLogger().info("[ImageFactory] Spawning Image");
+  // il2cpp_utils::getLogger().info("[ImageFactory] Deleting existing images and
+  // screens");
   if (inSong) {
     UnityEngine::GameObject::Destroy(inSongImage);
     UnityEngine::GameObject::Destroy(inSongScreen);
@@ -134,7 +136,7 @@ void ImageFactory::Components::IFImage::Spawn() {
         Vector3(angleX, angleY, angleZ), 0.0f, false, false, 4);
     UnityEngine::Object::DontDestroyOnLoad(inSongScreen);
     inSongScreen->SetActive(true);
-    il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
+    // il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
 
     inSongImage = BeatSaberUI::CreateImage(
         inSongScreen->get_transform(), sprite, Vector2(x, y),
@@ -142,27 +144,28 @@ void ImageFactory::Components::IFImage::Spawn() {
     UnityEngine::Object::DontDestroyOnLoad(inSongImage);
     inSongImage->set_color(Color(r, g, b, 1.0f));
     inSongImage->get_gameObject()->SetActive(true);
-    il2cpp_utils::getLogger().info("[ImageFactory] done");
+    // il2cpp_utils::getLogger().info("[ImageFactory] done");
   }
 
   if (!inSong) {
     UnityEngine::GameObject::Destroy(screen);
     UnityEngine::GameObject::Destroy(image);
 
-    il2cpp_utils::getLogger().info("[ImageFactory] Creating Screen");
+    // il2cpp_utils::getLogger().info("[ImageFactory] Creating Screen");
     screen = BeatSaberUI::CreateFloatingScreen(
         Vector2(scaleX * (width / 3), scaleY * (height / 3)), Vector3(x, y, z),
         Vector3(angleX, angleY, angleZ), 0.0f, false, false, 4);
     UnityEngine::Object::DontDestroyOnLoad(screen);
     screen->SetActive(true);
-    il2cpp_utils::getLogger().info("[ImageFactory] Activated Screen");
+    // il2cpp_utils::getLogger().info("[ImageFactory] Activated Screen");
 
-    il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
+    // il2cpp_utils::getLogger().info("[ImageFactory] Creating Image");
     image = BeatSaberUI::CreateImage(
         screen->get_transform(), sprite, Vector2(x, y),
         Vector2(scaleX * (width / 3), scaleY * (height / 3)));
     UnityEngine::Object::DontDestroyOnLoad(image);
-    il2cpp_utils::getLogger().info("[ImageFactory] Finished Creating Image");
+    // il2cpp_utils::getLogger().info("[ImageFactory] Finished Creating
+    // Image");
     image->get_gameObject()->SetActive(true);
     image->set_color(Color(r, g, b, 1.0f));
   }
