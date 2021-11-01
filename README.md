@@ -1,6 +1,7 @@
 # ImageFactory
 
-Port of image factory lol. wont bee finished soon bcuz skool and im bad @ codin
+Place and customize images throughout your game.
+Quest Port of https://github.com/Auros/ImageFactory/
 
 ## Credits
 
