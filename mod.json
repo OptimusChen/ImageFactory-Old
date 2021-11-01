@@ -7,7 +7,7 @@
     "version": "0.1.0",
     "packageId": "com.beatgames.beatsaber",
     "packageVersion": "1.17.1",
-    "description": "Images pog ",
+    "description": "Place and customize images throughout your game.",
     "modFiles": [
         "libImageFactory.so"
     ],
@@ -18,6 +18,62 @@
         {
           "name": "bsmg.png",
           "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Images/bsmg.png"
+        },
+        {
+          "name": "pixel.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/pixel.png"
+        },
+        {
+          "name": "auros.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/auros.png"
+        },
+        {
+          "name": "bandoot.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/bandoot.png"
+        },
+        {
+          "name": "github.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/github.png"
+        },
+        {
+          "name": "help.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/help.png"
+        },
+        {
+          "name": "logo.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/logo.png"
+        },
+        {
+          "name": "reset.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/reset.png"
+        },
+        {
+          "name": "settings.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/settings.png"
+        },
+        {
+          "name": "aurosActive.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/aurosActive.png"
+        },
+        {
+          "name": "bandootActive.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/bandootActive.png"
+        },
+        {
+          "name": "githubActive.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/githubActive.png"
+        },
+        {
+          "name": "helpActive.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/helpActive.png"
+        },
+        {
+          "name": "settingsActive.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/settingsActive.png"
+        },
+        {
+          "name": "resetActive.png",
+          "destination": "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Icons/resetActive.png"
         }
         
   ]

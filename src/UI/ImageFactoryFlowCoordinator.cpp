@@ -23,7 +23,7 @@ void ImageFactoryFlowCoordinator::DidActivate(bool firstActivation,
   if (firstActivation) {
     this->SetTitle(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>(
                        "IMAGEFACTORY"),
-                   HMUI::ViewController::AnimationDirection::Vertical);
+                   HMUI::ViewController::AnimationDirection::Horizontal);
     this->showBackButton = true;
     if (!this->imageFactoryView) {
       this->imageFactoryView = QuestUI::BeatSaberUI::CreateViewController<

@@ -47,8 +47,8 @@ using namespace ImageFactory::Hooks;
 
 UnityEngine::GameObject* GO;
 void createImagesFromConfig() {
-  GO = GameObject::New_ctor(
-      il2cpp_utils::createcsstr("IFIMAGEGO", il2cpp_utils::StringType::Manual));
+  GO = GameObject::New_ctor(il2cpp_utils::createcsstr(
+      "ImageFactoryImageGO", il2cpp_utils::StringType::Manual));
   std::string s = getPluginConfig().Images.GetValue();
   Il2CppString* csstr = il2cpp_utils::createcsstr(s);
   ConfigDocument& config = getPluginConfig().config->config;
@@ -133,8 +133,11 @@ void createImagesFromConfig() {
     }
   }
 
+  il2cpp_utils::getLogger().info("[IF] test12");
   PresentorManager::SpawnInMenu();
+  il2cpp_utils::getLogger().info("[IF] test13");
   GO->SetActive(false);
+  il2cpp_utils::getLogger().info("[IF] test14");
 }
 
 custom_types::Helpers::Coroutine DespawnImage(IFImage* image, float delay) {
@@ -159,19 +162,20 @@ custom_types::Helpers::Coroutine WaitForMenuLoad() {
   co_return;
 }
 
-bool hasLoadedImagesFromConfig = false;
+MAKE_HOOK_MATCH(MainFlowCoordinator_DidActivate,
+                &GlobalNamespace::MainFlowCoordinator::DidActivate, void,
+                GlobalNamespace::MainFlowCoordinator* self,
+                bool firstActivation, bool addedToHierarchy,
+                bool screenSystemEnabling) {
+  MainFlowCoordinator_DidActivate(self, firstActivation, addedToHierarchy,
+                                  screenSystemEnabling);
 
-MAKE_HOOK_MATCH(MainMenuViewController_DidActivate,
-                &MainMenuViewController::DidActivate, void,
-                MainMenuViewController* self, bool firstActivation,
-                bool addedToHierarchy, bool screenSystemEnabling) {
   if (PresentorManager::MAP->size() == 0) {
+    // createImagesFromConfig();
     GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
         reinterpret_cast<custom_types::Helpers::enumeratorT*>(
             custom_types::Helpers::CoroutineHelper::New(WaitForMenuLoad())));
   }
-  MainMenuViewController_DidActivate(self, firstActivation, addedToHierarchy,
-                                     screenSystemEnabling);
 }
 
 MAKE_HOOK_MATCH(ResultsViewController_DidActivate,
@@ -417,7 +421,7 @@ MAKE_HOOK_MATCH(
 }
 
 void PresentorHooks::AddHooks() {
-  INSTALL_HOOK(getLogger(), MainMenuViewController_DidActivate);
+  INSTALL_HOOK(getLogger(), MainFlowCoordinator_DidActivate);
   INSTALL_HOOK(getLogger(), ResultsViewController_DidActivate);
   INSTALL_HOOK(getLogger(), ResultsViewController_DidDeactivate);
   INSTALL_HOOK(getLogger(), SongEnd);

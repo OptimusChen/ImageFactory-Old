@@ -56,7 +56,6 @@ extern "C" void load() {
   QuestUI::Register::RegisterModSettingsFlowCoordinator<
       ImageFactory::ImageFactoryFlowCoordinator*>(modInfo);
 
-  new ImageFactory::Hooks::ScoreControllerUpdate("ScoreController_Update");
   new ImageFactory::Hooks::PresentorHooks("PresentorHooks");
 
   getLogger().info("Installing hooks...");
