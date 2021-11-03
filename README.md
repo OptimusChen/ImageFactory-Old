@@ -1,7 +1,14 @@
 # ImageFactory
 
 Place and customize images throughout your game.
-Quest Port of https://github.com/Auros/ImageFactory/
+<br>Quest Port of https://github.com/Auros/ImageFactory/
+<br>
+<br>
+# TODO:
+<br> - GIF Support
+<br> - Clearing config values
+<br> - Make image loading less laggy
+<br> - Correctly handle the image being null
 
 ## Credits
 
