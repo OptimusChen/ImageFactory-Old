@@ -18,6 +18,9 @@ DECLARE_CLASS_CODEGEN(
     DECLARE_INSTANCE_FIELD_DEFAULT(
         ImageFactory::ViewControllers::ImageEditingViewController*,
         imageEditingViewController, nullptr);
+    DECLARE_INSTANCE_FIELD_DEFAULT(
+        ImageFactory::ViewControllers::ImageFactoryViewController*,
+        imageFactoryViewController, nullptr);
     DECLARE_OVERRIDE_METHOD(void, DidActivate,
                             il2cpp_utils::FindMethodUnsafe("HMUI",
                                                            "FlowCoordinator",
@@ -29,6 +32,6 @@ DECLARE_CLASS_CODEGEN(
         il2cpp_utils::FindMethodUnsafe("HMUI", "FlowCoordinator",
                                        "BackButtonWasPressed", 1),
         HMUI::ViewController* topViewController);
-    void AddedImage(std::string);
+    void ResetConfig(); void AddedImage(std::string);
     void EditImage(ImageFactory::Components::IFImage* image);
     void DeleteImage(ImageFactory::Components::IFImage* image););

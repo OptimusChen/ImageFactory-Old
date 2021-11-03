@@ -10,4 +10,8 @@ DECLARE_CLASS_CODEGEN(
                                                            "ViewController",
                                                            "DidActivate", 3),
                             bool firstActivation, bool addedToHierarchy,
-                            bool screenSystemEnabling);)
+                            bool screenSystemEnabling);
+    public
+    : std::function<void()>
+        reset;
+    void set_resetConfigFunction(std::function<void()> resetConfigFunction);)

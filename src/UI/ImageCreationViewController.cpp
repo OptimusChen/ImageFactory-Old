@@ -2,8 +2,10 @@
 
 #include <filesystem>
 
+#include "GlobalNamespace/HMTask.hpp"
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "HMUI/Touchable.hpp"
+#include "System/Action.hpp"
 #include "System/IO/Directory.hpp"
 #include "System/IO/DirectoryInfo.hpp"
 #include "System/IO/File.hpp"
@@ -126,7 +128,6 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
     TMPro::TextMeshProUGUI* loadTimeText;
     UnityEngine::UI::Button* createButton;
     UnityEngine::UI::Button* cancelButton;
-
     for (auto& image : pictures) {
       UnityEngine::UI::HorizontalLayoutGroup* levelBarLayout =
           QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(

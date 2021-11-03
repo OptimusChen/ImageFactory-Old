@@ -5,6 +5,7 @@
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "GlobalNamespace/VRController.hpp"
 #include "HMUI/Touchable.hpp"
+#include "PluginConfig.hpp"
 #include "Presenters/PresentorManager.hpp"
 #include "UnityEngine/Collider.hpp"
 #include "UnityEngine/Color.hpp"
@@ -18,8 +19,6 @@
 #include "UnityEngine/Vector2.hpp"
 #include "UnityEngine/Vector3.hpp"
 #include "Utils/FileUtils.hpp"
-#include "VRUIControls/VRGraphicRaycaster.hpp"
-#include "VRUIControls/VRPointer.hpp"
 #include "beatsaber-hook/shared/utils/utils.h"
 #include "include/PluginConfig.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
@@ -124,6 +123,13 @@ void ImageFactory::Components::IFImage::SpawnEditorDummy() {
 void ImageFactory::Components::IFImage::Spawn() {
   if (!enabled) return;
   if (hasSpawned) return;
+  if (!getPluginConfig().Enabled.GetValue()) return;
+  UnityEngine::GameObject* comboPanel =
+      UnityEngine::GameObject::Find(il2cpp_utils::createcsstr("ComboPanel"));
+  if (!comboPanel && !getPluginConfig().IgnoreNoTextAndHud.GetValue() &&
+      inSong) {
+    return;
+  }
   hasSpawned = true;
   // il2cpp_utils::getLogger().info("[ImageFactory] Spawning Image");
   // il2cpp_utils::getLogger().info("[ImageFactory] Deleting existing images and

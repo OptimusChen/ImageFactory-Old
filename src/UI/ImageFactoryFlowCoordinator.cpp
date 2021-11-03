@@ -46,21 +46,43 @@ void ImageFactoryFlowCoordinator::DidActivate(bool firstActivation,
         ImageFactory::ViewControllers::ImageEditingViewController*>(
         imageEditingView);
 
+    this->imageFactoryViewController = reinterpret_cast<
+        ImageFactory::ViewControllers::ImageFactoryViewController*>(
+        imageFactoryView);
+
     std::function<void(std::string)> addImage = std::bind(
         &ImageFactoryFlowCoordinator::AddedImage, this, std::placeholders::_1);
     std::function<void(IFImage*)> editImage = std::bind(
         &ImageFactoryFlowCoordinator::EditImage, this, std::placeholders::_1);
     std::function<void(IFImage*)> deleteImage = std::bind(
         &ImageFactoryFlowCoordinator::DeleteImage, this, std::placeholders::_1);
+    std::function<void()> resetConfig =
+        std::bind(&ImageFactoryFlowCoordinator::ResetConfig, this);
     imageCreationViewController->set_createImageFunction(addImage);
     imageEditingViewController->set_editImageFunction(editImage);
     imageEditingViewController->set_deleteImageFunction(deleteImage);
+    imageFactoryViewController->set_resetConfigFunction(resetConfig);
 
     ImageFactoryFlowCoordinator::ProvideInitialViewControllers(
         imageFactoryView, imageCreationViewController,
         imageEditingViewController, nullptr, nullptr);
   }
 }
+
+void ImageFactoryFlowCoordinator::ResetConfig() {
+  for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
+    DeleteImage(pair.first);
+  }
+  getPluginConfig().config->config.RemoveAllMembers();
+  getPluginConfig().Amount.SetValue(0);
+  getPluginConfig().AnimateImages.SetValue(true);
+  getPluginConfig().Enabled.SetValue(true);
+  getPluginConfig().IgnoreNoTextAndHud.SetValue(false);
+  getPluginConfig().Images.SetValue("");
+  getPluginConfig().config->Write();
+  getPluginConfig().config->Reload();
+}
+
 void ImageFactoryFlowCoordinator::DeleteImage(
     ImageFactory::Components::IFImage* image) {
   this->imageEditingViewController->Refresh();
@@ -77,13 +99,11 @@ void ImageFactoryFlowCoordinator::DeleteImage(
                       Il2CppString::_get_Empty()))));
     getPluginConfig().config->Write();
     getPluginConfig().config->Reload();
-    // PresentorManager::ClearInfo(image);
     image->Despawn();
     image->x = 1000.0f;
     image->y = 1000.0f;
     image->z = 1000.0f;
     image->enabled = false;
-    // UnityEngine::GameObject::Destroy(image);
   }
 
   this->SetRightScreenViewController(imageEditingViewController,
