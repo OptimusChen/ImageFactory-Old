@@ -77,77 +77,91 @@ void ImageEditingViewController::DidActivate(bool firstActivation,
 
     scrollableList = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(
         listBG->get_transform());
-    std::string s = getPluginConfig().Images.GetValue();
-    Il2CppString* csstr = il2cpp_utils::createcsstr(s);
-    ConfigDocument& config = getPluginConfig().config->config;
-    for (int i = 0; i < csstr->Split('/')->get_Length(); i++) {
-      Il2CppString* csfileName = csstr->Split('/')->get(i);
-      std::string fileName = to_utf8(csstrtostr(csfileName));
-      if (fileName.compare("") == 1) {
-        il2cpp_utils::getLogger().info("[ImageFactory] %s", fileName.c_str());
-        UnityEngine::UI::HorizontalLayoutGroup* levelBarLayout =
-            QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(
-                scrollableList->get_transform());
-        UnityEngine::GameObject* prefab = levelBarLayout->get_gameObject();
 
-        levelBarLayout->set_childControlWidth(false);
-        UnityEngine::UI::LayoutElement* levelBarLayoutElement =
-            levelBarLayout->GetComponent<UnityEngine::UI::LayoutElement*>();
-        levelBarLayoutElement->set_minHeight(10.0f);
-        levelBarLayoutElement->set_minWidth(20.0f);
-        if (config.HasMember(fileName)) {
-          rapidjson::Value& configValue = config[fileName];
-          Sprite* sprite = QuestUI::BeatSaberUI::FileToSprite(
-              configValue["path"].GetString());
-          QuestUI::BeatSaberUI::CreateImage(
-              levelBarLayoutElement->get_transform(), sprite,
-              Vector2(2.0f, 0.0f), Vector2(10.0f, 2.0f));
-          if (!configValue["enabled"].GetBool()) {
-            QuestUI::BeatSaberUI::CreateText(
-                levelBarLayoutElement->get_transform(),
-                configValue["name"].GetString(), true)
-                ->set_color(Color(1.0f, 0.0f, 0.0f, 1.0f));
-          } else {
-            QuestUI::BeatSaberUI::CreateText(
-                levelBarLayoutElement->get_transform(),
-                configValue["name"].GetString(), true)
-                ->set_color(Color(0.0f, 1.0f, 0.0f, 1.0f));
-          }
-          levelBarLayoutElement->set_minWidth(1.0f);
-          levelBarLayoutElement->set_minHeight(1.0f);
-          auto deleteButton = QuestUI::BeatSaberUI::CreateUIButton(
-              levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
-              Vector2(12.0f, 9.0f), [this, fileName]() {
-                for (std::pair<IFImage*, std::string> pair :
-                     *PresentorManager::MAP) {
-                  if (pair.first->internalName.compare(fileName) == 0) {
-                    deleteImageFunction(pair.first);
-                  }
-                }
-              });
-          auto deleteText = QuestUI::BeatSaberUI::CreateText(
-              deleteButton->get_transform(), "X");
-          deleteText->set_alignment(TMPro::TextAlignmentOptions::Center);
-          deleteText->set_color(Color(1.0f, 0.0f, 0.0f, 1.0f));
-          auto editButton = QuestUI::BeatSaberUI::CreateUIButton(
-              levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
-              Vector2(12.0f, 9.0f), [this, fileName]() {
-                for (std::pair<IFImage*, std::string> pair :
-                     *PresentorManager::MAP) {
-                  if (pair.first->internalName.compare(fileName) == 0) {
-                    editImageFunction(pair.first);
-                  }
-                }
-              });
-          auto editText = QuestUI::BeatSaberUI::CreateText(
-              editButton->get_transform(), "<-");
-          editText->set_alignment(TMPro::TextAlignmentOptions::Center);
-        }
-        refresh = false;
-      }
-    }
+    GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
+        reinterpret_cast<System::Collections::IEnumerator*>(
+            custom_types::Helpers::CoroutineHelper::New(
+                SetUpListElements(scrollableList))));
   }
 }
+
+custom_types::Helpers::Coroutine ImageEditingViewController::SetUpListElements(
+    UnityEngine::GameObject* list) {
+  std::string s = getPluginConfig().Images.GetValue();
+  Il2CppString* csstr = il2cpp_utils::createcsstr(s);
+  ConfigDocument& config = getPluginConfig().config->config;
+  int i = 0;
+  while (!(i == csstr->Split('/')->get_Length())) {
+    Il2CppString* csfileName = csstr->Split('/')->get(i);
+    std::string fileName = to_utf8(csstrtostr(csfileName));
+    if (fileName.compare("") == 1) {
+      il2cpp_utils::getLogger().info("[ImageFactory] %s", fileName.c_str());
+      UnityEngine::UI::HorizontalLayoutGroup* levelBarLayout =
+          QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(
+              scrollableList->get_transform());
+      UnityEngine::GameObject* prefab = levelBarLayout->get_gameObject();
+
+      levelBarLayout->set_childControlWidth(false);
+      UnityEngine::UI::LayoutElement* levelBarLayoutElement =
+          levelBarLayout->GetComponent<UnityEngine::UI::LayoutElement*>();
+      levelBarLayoutElement->set_minHeight(10.0f);
+      levelBarLayoutElement->set_minWidth(20.0f);
+      if (config.HasMember(fileName)) {
+        rapidjson::Value& configValue = config[fileName];
+        Sprite* sprite =
+            QuestUI::BeatSaberUI::FileToSprite(configValue["path"].GetString());
+        QuestUI::BeatSaberUI::CreateImage(
+            levelBarLayoutElement->get_transform(), sprite, Vector2(2.0f, 0.0f),
+            Vector2(10.0f, 2.0f));
+        if (!configValue["enabled"].GetBool()) {
+          QuestUI::BeatSaberUI::CreateText(
+              levelBarLayoutElement->get_transform(),
+              configValue["name"].GetString(), true)
+              ->set_color(Color(1.0f, 0.0f, 0.0f, 1.0f));
+        } else {
+          QuestUI::BeatSaberUI::CreateText(
+              levelBarLayoutElement->get_transform(),
+              configValue["name"].GetString(), true)
+              ->set_color(Color(0.0f, 1.0f, 0.0f, 1.0f));
+        }
+        levelBarLayoutElement->set_minWidth(1.0f);
+        levelBarLayoutElement->set_minHeight(1.0f);
+        auto deleteButton = QuestUI::BeatSaberUI::CreateUIButton(
+            levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
+            Vector2(12.0f, 9.0f), [this, fileName]() {
+              for (std::pair<IFImage*, std::string> pair :
+                   *PresentorManager::MAP) {
+                if (pair.first->internalName.compare(fileName) == 0) {
+                  deleteImageFunction(pair.first);
+                }
+              }
+            });
+        auto deleteText = QuestUI::BeatSaberUI::CreateText(
+            deleteButton->get_transform(), "X");
+        deleteText->set_alignment(TMPro::TextAlignmentOptions::Center);
+        deleteText->set_color(Color(1.0f, 0.0f, 0.0f, 1.0f));
+        auto editButton = QuestUI::BeatSaberUI::CreateUIButton(
+            levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
+            Vector2(12.0f, 9.0f), [this, fileName]() {
+              for (std::pair<IFImage*, std::string> pair :
+                   *PresentorManager::MAP) {
+                if (pair.first->internalName.compare(fileName) == 0) {
+                  editImageFunction(pair.first);
+                }
+              }
+            });
+        auto editText =
+            QuestUI::BeatSaberUI::CreateText(editButton->get_transform(), "<-");
+        editText->set_alignment(TMPro::TextAlignmentOptions::Center);
+      }
+      refresh = false;
+    }
+    i++;
+    co_yield nullptr;
+  }
+  co_return;
+}
+
 void ImageEditingViewController::Refresh() {
   this->refresh = true;
   UnityEngine::Object::Destroy(scrollableList);

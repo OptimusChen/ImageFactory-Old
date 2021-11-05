@@ -69,12 +69,12 @@ std::string removeTrailingZeros(std::string s, int amount) {
   return s;
 }
 
-std::vector<std::string> pictures;
+std::vector<std::string> pics;
 
 void ImageCreationViewController::DidActivate(bool firstActivation,
                                               bool addedToHierarchy,
                                               bool screenSystemEnabling) {
-  pictures = ImageFactory::FileUtils::getFiles(
+  pics = ImageFactory::FileUtils::getFiles(
       "/sdcard/ModData/com.beatgames.beatsaber/Mods/ImageFactory/Images/");
   if (firstActivation) {
     if (!get_gameObject()) return;
@@ -117,114 +117,124 @@ void ImageCreationViewController::DidActivate(bool firstActivation,
     UnityEngine::GameObject* list =
         QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(
             listBG->get_transform());
-
-    HMUI::ModalView* createImage;
-    UnityEngine::GameObject* createImageGO;
-    HMUI::ImageView* imageDisplay;
-    TMPro::TextMeshProUGUI* animText;
-    TMPro::TextMeshProUGUI* widthDisplayText;
-    TMPro::TextMeshProUGUI* heightText;
-    TMPro::TextMeshProUGUI* fileSizeDisplayText;
-    TMPro::TextMeshProUGUI* loadTimeText;
-    UnityEngine::UI::Button* createButton;
-    UnityEngine::UI::Button* cancelButton;
-    for (auto& image : pictures) {
-      UnityEngine::UI::HorizontalLayoutGroup* levelBarLayout =
-          QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(
-              list->get_transform());
-      UnityEngine::GameObject* prefab = levelBarLayout->get_gameObject();
-
-      levelBarLayout->set_childControlWidth(false);
-      UnityEngine::UI::LayoutElement* levelBarLayoutElement =
-          levelBarLayout->GetComponent<UnityEngine::UI::LayoutElement*>();
-      levelBarLayoutElement->set_minHeight(10.0f);
-      levelBarLayoutElement->set_minWidth(20.0f);
-      Sprite* sprite = QuestUI::BeatSaberUI::FileToSprite(image.c_str());
-
-      QuestUI::BeatSaberUI::CreateImage(levelBarLayoutElement->get_transform(),
-                                        sprite, Vector2(2.0f, 0.0f),
-                                        Vector2(10.0f, 2.0f));
-
-      System::IO::FileStream* stream = System::IO::FileStream::New_ctor(
-          il2cpp_utils::createcsstr(image.c_str()), System::IO::FileMode::Open);
-      long fileSize = GetFileSize(image.c_str(), stream);
-      QuestUI::BeatSaberUI::CreateText(
-          levelBarLayoutElement->get_transform(),
-          FileUtils::GetFileName(image.c_str(), false), true);
-      levelBarLayoutElement->set_minWidth(1.0f);
-      auto addBtn = QuestUI::BeatSaberUI::CreateUIButton(
-          levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
-          Vector2(10.0f, 10.0f),
-          [image, this, sprite, createImage, animText, widthDisplayText,
-           heightText, fileSizeDisplayText, loadTimeText, createImageGO,
-           imageDisplay, stream, fileSize, createButton,
-           cancelButton]() mutable -> void {
-            createImage = QuestUI::BeatSaberUI::CreateModal(
-                get_transform(), UnityEngine::Vector2(70.0f, 50.0f),
-                [](HMUI::ModalView* modal) {}, true);
-            createImageGO =
-                QuestUI::BeatSaberUI::CreateScrollableModalContainer(
-                    createImage);
-            imageDisplay = QuestUI::BeatSaberUI::CreateImage(
-                createImage->get_transform(), sprite, Vector2(-18.0f, 8.0f),
-                Vector2(30.0f, 30.0f));
-            if (FileUtils::isGifFile(image.c_str())) {
-              animText = QuestUI::BeatSaberUI::CreateText(
-                  createImage->get_transform(), "Animated: Yes",
-                  Vector2(30.0f, 17.0f));
-            } else {
-              animText = QuestUI::BeatSaberUI::CreateText(
-                  createImage->get_transform(), "Animated: No",
-                  Vector2(30.0f, 17.0f));
-            }
-            widthDisplayText = QuestUI::BeatSaberUI::CreateText(
-                createImage->get_transform(),
-                "Width: " +
-                    removeTrailingZeros(
-                        std::to_string(sprite->get_textureRect().get_width()),
-                        6) +
-                    "px",
-                Vector2(30.0f, 11.0f));
-            heightText = QuestUI::BeatSaberUI::CreateText(
-                createImage->get_transform(),
-                "Height: " +
-                    removeTrailingZeros(
-                        std::to_string(sprite->get_textureRect().get_height()),
-                        6) +
-                    "px",
-                Vector2(30.0f, 5.0f));
-            fileSizeDisplayText = QuestUI::BeatSaberUI::CreateText(
-                createImage->get_transform(),
-                "File Size: " +
-                    removeTrailingZeros(
-                        std::to_string(
-                            round(fileSize / FileSizeDivisor(fileSize))),
-                        6) +
-                    " " + FileSizeExtension(fileSize),
-                Vector2(30.0f, -1.0f));
-            loadTimeText = QuestUI::BeatSaberUI::CreateText(
-                createImage->get_transform(), "Load Time: 0 ms",
-                Vector2(30.0f, -7.0f));
-            createButton = QuestUI::BeatSaberUI::CreateUIButton(
-                createImage->get_transform(), "CREATE", Vector2(14.0f, -17.0f),
-                Vector2(30.0f, 10.0f),
-                [&]() { this->createImageFunction(image.c_str()); });
-            cancelButton = QuestUI::BeatSaberUI::CreateUIButton(
-                createImage->get_transform(), "CANCEL", Vector2(-18.0f, -17.0f),
-                Vector2(30.0f, 10.0f),
-                [createImage]() { createImage->Hide(true, nullptr); });
-            animText->set_fontSize(5.0f);
-            widthDisplayText->set_fontSize(5.0f);
-            heightText->set_fontSize(5.0f);
-            fileSizeDisplayText->set_fontSize(5.0f);
-            loadTimeText->set_fontSize(5.0f);
-            createImage->Show(true, false, nullptr);
-          });
-
-      QuestUI::BeatSaberUI::CreateText(addBtn->get_transform(), "+")
-          ->set_alignment(TMPro::TextAlignmentOptions::Center);
-    }
+    GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
+        reinterpret_cast<System::Collections::IEnumerator*>(
+            custom_types::Helpers::CoroutineHelper::New(
+                SetUpListElements(list, pics))));
   }
+}
+custom_types::Helpers::Coroutine ImageCreationViewController::SetUpListElements(
+    UnityEngine::GameObject* list, std::vector<std::string> pictures) {
+  HMUI::ModalView* createImage;
+  UnityEngine::GameObject* createImageGO;
+  HMUI::ImageView* imageDisplay;
+  TMPro::TextMeshProUGUI* animText;
+  TMPro::TextMeshProUGUI* widthDisplayText;
+  TMPro::TextMeshProUGUI* heightText;
+  TMPro::TextMeshProUGUI* fileSizeDisplayText;
+  TMPro::TextMeshProUGUI* loadTimeText;
+  UnityEngine::UI::Button* createButton;
+  UnityEngine::UI::Button* cancelButton;
+  int i = 0;
+  while (!(i == pictures.size())) {
+    auto image = pictures.at(i);
+    i++;
+    UnityEngine::UI::HorizontalLayoutGroup* levelBarLayout =
+        QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(
+            list->get_transform());
+    UnityEngine::GameObject* prefab = levelBarLayout->get_gameObject();
+
+    levelBarLayout->set_childControlWidth(false);
+    UnityEngine::UI::LayoutElement* levelBarLayoutElement =
+        levelBarLayout->GetComponent<UnityEngine::UI::LayoutElement*>();
+    levelBarLayoutElement->set_minHeight(10.0f);
+    levelBarLayoutElement->set_minWidth(20.0f);
+    Sprite* sprite = QuestUI::BeatSaberUI::FileToSprite(image.c_str());
+
+    QuestUI::BeatSaberUI::CreateImage(levelBarLayoutElement->get_transform(),
+                                      sprite, Vector2(2.0f, 0.0f),
+                                      Vector2(10.0f, 2.0f));
+
+    System::IO::FileStream* stream = System::IO::FileStream::New_ctor(
+        il2cpp_utils::createcsstr(image.c_str()), System::IO::FileMode::Open);
+    long fileSize = GetFileSize(image.c_str(), stream);
+    QuestUI::BeatSaberUI::CreateText(
+        levelBarLayoutElement->get_transform(),
+        FileUtils::GetFileName(image.c_str(), false), true);
+    levelBarLayoutElement->set_minWidth(1.0f);
+    auto addBtn = QuestUI::BeatSaberUI::CreateUIButton(
+        levelBarLayoutElement->get_transform(), "", Vector2(0.0f, 0.0f),
+        Vector2(10.0f, 10.0f),
+        [image, this, sprite, createImage, animText, widthDisplayText,
+         heightText, fileSizeDisplayText, loadTimeText, createImageGO,
+         imageDisplay, stream, fileSize, createButton,
+         cancelButton]() mutable -> void {
+          createImage = QuestUI::BeatSaberUI::CreateModal(
+              get_transform(), UnityEngine::Vector2(70.0f, 50.0f),
+              [](HMUI::ModalView* modal) {}, true);
+          createImageGO =
+              QuestUI::BeatSaberUI::CreateScrollableModalContainer(createImage);
+          imageDisplay = QuestUI::BeatSaberUI::CreateImage(
+              createImage->get_transform(), sprite, Vector2(-18.0f, 8.0f),
+              Vector2(30.0f, 30.0f));
+          if (FileUtils::isGifFile(image.c_str())) {
+            animText = QuestUI::BeatSaberUI::CreateText(
+                createImage->get_transform(), "Animated: Yes",
+                Vector2(30.0f, 17.0f));
+          } else {
+            animText = QuestUI::BeatSaberUI::CreateText(
+                createImage->get_transform(), "Animated: No",
+                Vector2(30.0f, 17.0f));
+          }
+          widthDisplayText = QuestUI::BeatSaberUI::CreateText(
+              createImage->get_transform(),
+              "Width: " +
+                  removeTrailingZeros(
+                      std::to_string(sprite->get_textureRect().get_width()),
+                      6) +
+                  "px",
+              Vector2(30.0f, 11.0f));
+          heightText = QuestUI::BeatSaberUI::CreateText(
+              createImage->get_transform(),
+              "Height: " +
+                  removeTrailingZeros(
+                      std::to_string(sprite->get_textureRect().get_height()),
+                      6) +
+                  "px",
+              Vector2(30.0f, 5.0f));
+          fileSizeDisplayText = QuestUI::BeatSaberUI::CreateText(
+              createImage->get_transform(),
+              "File Size: " +
+                  removeTrailingZeros(
+                      std::to_string(
+                          round(fileSize / FileSizeDivisor(fileSize))),
+                      6) +
+                  " " + FileSizeExtension(fileSize),
+              Vector2(30.0f, -1.0f));
+          loadTimeText = QuestUI::BeatSaberUI::CreateText(
+              createImage->get_transform(), "Load Time: 0 ms",
+              Vector2(30.0f, -7.0f));
+          createButton = QuestUI::BeatSaberUI::CreateUIButton(
+              createImage->get_transform(), "CREATE", Vector2(14.0f, -17.0f),
+              Vector2(30.0f, 10.0f),
+              [&]() { this->createImageFunction(image.c_str()); });
+          cancelButton = QuestUI::BeatSaberUI::CreateUIButton(
+              createImage->get_transform(), "CANCEL", Vector2(-18.0f, -17.0f),
+              Vector2(30.0f, 10.0f),
+              [createImage]() { createImage->Hide(true, nullptr); });
+          animText->set_fontSize(5.0f);
+          widthDisplayText->set_fontSize(5.0f);
+          heightText->set_fontSize(5.0f);
+          fileSizeDisplayText->set_fontSize(5.0f);
+          loadTimeText->set_fontSize(5.0f);
+          createImage->Show(true, false, nullptr);
+        });
+
+    QuestUI::BeatSaberUI::CreateText(addBtn->get_transform(), "+")
+        ->set_alignment(TMPro::TextAlignmentOptions::Center);
+    co_yield nullptr;
+  }
+  co_return;
 }
 
 void ImageCreationViewController::set_createImageFunction(

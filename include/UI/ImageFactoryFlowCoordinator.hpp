@@ -32,6 +32,8 @@ DECLARE_CLASS_CODEGEN(
         il2cpp_utils::FindMethodUnsafe("HMUI", "FlowCoordinator",
                                        "BackButtonWasPressed", 1),
         HMUI::ViewController* topViewController);
-    void ResetConfig(); void AddedImage(std::string);
+    public
+    : void ResetConfig();
+    void AddedImage(std::string);
     void EditImage(ImageFactory::Components::IFImage* image);
     void DeleteImage(ImageFactory::Components::IFImage* image););

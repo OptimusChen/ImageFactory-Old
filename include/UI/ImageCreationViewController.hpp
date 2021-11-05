@@ -1,5 +1,6 @@
 #pragma once
 #include "HMUI/ViewController.hpp"
+#include "custom-types/shared/coroutine.hpp"
 #include "custom-types/shared/macros.hpp"
 
 DECLARE_CLASS_CODEGEN(
@@ -14,5 +15,7 @@ DECLARE_CLASS_CODEGEN(
     public
     : std::function<void(std::string)>
         createImageFunction;
+    custom_types::Helpers::Coroutine SetUpListElements(
+        UnityEngine::GameObject * parent, std::vector<std::string> pictures);
     void set_createImageFunction(
         std::function<void(std::string)> createImageFunction););

@@ -1,5 +1,6 @@
 #include "UI/ImageFactoryFlowCoordinator.hpp"
 
+#include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
 #include "Presenters/PresentorManager.hpp"
@@ -69,20 +70,6 @@ void ImageFactoryFlowCoordinator::DidActivate(bool firstActivation,
   }
 }
 
-void ImageFactoryFlowCoordinator::ResetConfig() {
-  for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
-    DeleteImage(pair.first);
-  }
-  getPluginConfig().config->config.RemoveAllMembers();
-  getPluginConfig().Amount.SetValue(0);
-  getPluginConfig().AnimateImages.SetValue(true);
-  getPluginConfig().Enabled.SetValue(true);
-  getPluginConfig().IgnoreNoTextAndHud.SetValue(false);
-  getPluginConfig().Images.SetValue("");
-  getPluginConfig().config->Write();
-  getPluginConfig().config->Reload();
-}
-
 void ImageFactoryFlowCoordinator::DeleteImage(
     ImageFactory::Components::IFImage* image) {
   this->imageEditingViewController->Refresh();
@@ -108,6 +95,46 @@ void ImageFactoryFlowCoordinator::DeleteImage(
 
   this->SetRightScreenViewController(imageEditingViewController,
                                      HMUI::ViewController::AnimationType::In);
+}
+custom_types::Helpers::Coroutine DeleteAllImages(
+    ImageFactory::ImageFactoryFlowCoordinator* self) {
+  std::string s = getPluginConfig().Images.GetValue();
+  Il2CppString* csstr = il2cpp_utils::createcsstr(s);
+  ConfigDocument& config = getPluginConfig().config->config;
+  int i = 0;
+  while (!(i == csstr->Split('/')->get_Length())) {
+    Il2CppString* csfileName = csstr->Split('/')->get(i);
+    std::string fileName = to_utf8(csstrtostr(csfileName));
+    if (fileName.compare("") == 1) {
+      for (std::pair<IFImage*, std::string> pair : *PresentorManager::MAP) {
+        if (pair.first->internalName.compare(fileName) == 0) {
+          self->DeleteImage(pair.first);
+        }
+      }
+    }
+    i++;
+    co_yield nullptr;
+  }
+  getPluginConfig().config->config.RemoveAllMembers();
+  getPluginConfig().Amount.SetValue(0);
+  getPluginConfig().AnimateImages.SetValue(true);
+  getPluginConfig().Enabled.SetValue(true);
+  getPluginConfig().IgnoreNoTextAndHud.SetValue(false);
+  getPluginConfig().Images.SetValue("");
+  getPluginConfig().config->Write();
+  getPluginConfig().config->Reload();
+  self->SetRightScreenViewController(
+      QuestUI::BeatSaberUI::CreateViewController<HMUI::ViewController*>(),
+      HMUI::ViewController::AnimationType::In);
+  self->SetRightScreenViewController(self->imageEditingViewController,
+                                     HMUI::ViewController::AnimationType::In);
+  co_return;
+}
+
+void ImageFactoryFlowCoordinator::ResetConfig() {
+  GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(
+      reinterpret_cast<System::Collections::IEnumerator*>(
+          custom_types::Helpers::CoroutineHelper::New(DeleteAllImages(this))));
 }
 
 void ImageFactoryFlowCoordinator::EditImage(
