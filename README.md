@@ -6,9 +6,6 @@ Place and customize images throughout your game.
 <br>
 # TODO:
 <br> - GIF Support
-<br> - Clearing config values
-<br> - Make image loading less laggy
-<br> - Correctly handle the image being null
 
 ## Credits
 
